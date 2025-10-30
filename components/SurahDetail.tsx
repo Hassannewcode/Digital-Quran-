@@ -1,0 +1,111 @@
+import React from 'react';
+import { Surah, Ayah, PlayingState, Note, Reciter, Translation } from '../types';
+import AyahView from './AyahView';
+import PlaybackControls from './PlaybackControls';
+import SettingsPanel from './SettingsPanel';
+
+interface SurahDetailProps {
+  surah: Surah;
+  onPlay: (ayah: Ayah, surahId: number, continuous?: boolean) => void;
+  playingState: PlayingState;
+  isBookmarked: (surahId: number, ayahId: number) => boolean;
+  getNoteForAyah: (surahId: number, ayahId: number) => string;
+  onToggleBookmark: (surahId: number, ayahId: number) => void;
+  onSaveNote: (surahId: number, ayahId: number, text: string) => void;
+  onToggleSurahPlay: (surah: Surah) => void;
+  notes: Note[];
+  reciters: Reciter[];
+  translations: Translation[];
+  selectedReciterId: string;
+  selectedTranslationId: string;
+  onReciterChange: (id: string) => void;
+  onTranslationChange: (id: string) => void;
+}
+
+const AYAH_THRESHOLD_FOR_CONTINUOUS_PLAY = 200;
+
+const SurahDetail: React.FC<SurahDetailProps> = ({ 
+    surah, 
+    onPlay, 
+    playingState,
+    isBookmarked,
+    getNoteForAyah,
+    onToggleBookmark,
+    onSaveNote,
+    onToggleSurahPlay,
+    notes,
+    reciters,
+    translations,
+    selectedReciterId,
+    selectedTranslationId,
+    onReciterChange,
+    onTranslationChange
+}) => {
+  const isLargeSurah = surah.ayahs.length > AYAH_THRESHOLD_FOR_CONTINUOUS_PLAY;
+  const surahNotes = notes
+    .filter(note => note.surahId === surah.id)
+    .sort((a, b) => a.ayahId - b.ayahId);
+  const hasNotes = surahNotes.length > 0;
+
+  return (
+    <>
+    <SettingsPanel
+        reciters={reciters}
+        translations={translations}
+        selectedReciterId={selectedReciterId}
+        selectedTranslationId={selectedTranslationId}
+        onReciterChange={onReciterChange}
+        onTranslationChange={onTranslationChange}
+    />
+    <div className={`flex flex-col ${hasNotes ? 'lg:flex-row-reverse' : ''} gap-8 items-start`}>
+      {hasNotes && (
+        <aside className="w-full lg:w-1/3">
+          <div className="sticky top-24">
+            <h3 className="text-lg font-semibold mb-4 text-slate-700 dark:text-zinc-300 font-arabic">ملاحظات</h3>
+            <div className="space-y-4 max-h-[70vh] overflow-y-auto p-1">
+              {surahNotes.map(note => (
+                <div key={note.ayahId} id={`note-${note.surahId}-${note.ayahId}`} className="p-4 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg shadow-sm">
+                  <p className="font-bold text-sm text-blue-600 dark:text-blue-400">Verse {note.ayahId}</p>
+                  <p className="text-sm text-slate-700 dark:text-zinc-300 mt-1 whitespace-pre-wrap">{note.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </aside>
+      )}
+      <div className={`w-full ${hasNotes ? 'lg:w-2/3' : 'lg:w-full'}`}>
+        <PlaybackControls 
+          surah={surah}
+          playingState={playingState}
+          onTogglePlay={onToggleSurahPlay}
+          isLarge={isLargeSurah}
+        />
+        <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-md divide-y divide-slate-200 dark:divide-zinc-800">
+          {surah.id !== 1 && surah.id !== 9 && (
+            <div className="p-4 md:p-6">
+                <p className="text-center text-2xl font-amiri-quran text-slate-700 dark:text-zinc-300">
+                بِسْمِ اللَّهِ الرَّحْمَـٰنِ الرَّحِيمِ
+                </p>
+            </div>
+          )}
+          {surah.ayahs.map((ayah) => (
+            <AyahView
+                key={ayah.id}
+                ayah={ayah}
+                surah={surah}
+                onPlay={() => onPlay(ayah, surah.id, false)}
+                playingState={playingState}
+                isBookmarked={isBookmarked(surah.id, ayah.id)}
+                note={getNoteForAyah(surah.id, ayah.id)}
+                onToggleBookmark={() => onToggleBookmark(surah.id, ayah.id)}
+                onSaveNote={(text) => onSaveNote(surah.id, ayah.id, text)}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+    </>
+  );
+};
+
+export default SurahDetail;

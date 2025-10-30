@@ -1,0 +1,1 @@
+export const EN_SAHIH_TRANSLATION: Record<string, Record<string, string>> = {};
