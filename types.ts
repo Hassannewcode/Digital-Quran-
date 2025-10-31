@@ -19,7 +19,8 @@ export type View = 'list' | 'detail' | 'bookmarks' | 'settings';
 export type PlayingState = {
     status: 'idle';
 } | {
-    status: PlayingStatus;
+    // Fix: Made PlayingState a proper discriminated union by ensuring 'idle' status is only in one part of the union.
+    status: 'loading' | 'playing' | 'paused' | 'error';
     surahId: number;
     ayahId: number; // For single/verse-by-verse: current ayah. For range modes: start ayah of range/chunk.
     mode: PlayingMode;
