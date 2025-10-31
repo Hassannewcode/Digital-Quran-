@@ -26,7 +26,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                     id="reciter-select"
                     value={selectedReciterId}
                     onChange={(e) => onReciterChange(e.target.value)}
-                    className="block w-full sm:w-auto pl-3 pr-8 py-2 text-base border-slate-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-200"
+                    className="block w-full sm:w-auto pl-3 pr-8 py-2 text-base bg-white dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 text-slate-900 dark:text-zinc-200 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md"
                 >
                     {reciters.map(reciter => (
                         <option key={reciter.id} value={reciter.id}>{reciter.name}</option>
@@ -39,7 +39,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                     id="translation-select"
                     value={selectedTranslationId}
                     onChange={(e) => onTranslationChange(e.target.value)}
-                    className="block w-full sm:w-auto pl-3 pr-8 py-2 text-base border-slate-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-200"
+                    className="block w-full sm:w-auto pl-3 pr-8 py-2 text-base bg-white dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 text-slate-900 dark:text-zinc-200 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
                 >
                     {translations.map(translation => (
                         <option key={translation.id} value={translation.id}>{translation.name}</option>

@@ -1,0 +1,112 @@
+import { Surah, Ayah } from '../types';
+
+export type WordStatus = 'pending' | 'correct' | 'incorrect' | 'current';
+
+const normalizeArabic = (text: string): string => {
+  // This function simplifies Arabic text for more lenient matching.
+  // It removes diacritics, normalizes Alef variants, and Taa Marbuta.
+  return text
+    .replace(/[\u064B-\u0652]/g, '') // Remove harakat (vowels)
+    .replace(/\u0640/g, '') // Remove Tatweel
+    .replace(/[أإآ]/g, 'ا') // Normalize Alef variants
+    .replace(/ة/g, 'ه')     // Normalize Taa Marbuta
+    .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()؟]/g, '') // Remove punctuation
+    .trim();
+};
+
+const levenshteinDistance = (a: string, b: string): number => {
+    if (a.length === 0) return b.length;
+    if (b.length === 0) return a.length;
+
+    const matrix = Array(b.length + 1).fill(null).map(() => Array(a.length + 1).fill(null));
+
+    for (let i = 0; i <= a.length; i++) {
+        matrix[0][i] = i;
+    }
+    for (let j = 0; j <= b.length; j++) {
+        matrix[j][0] = j;
+    }
+
+    for (let j = 1; j <= b.length; j++) {
+        for (let i = 1; i <= a.length; i++) {
+            const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+            matrix[j][i] = Math.min(
+                matrix[j][i - 1] + 1, // deletion
+                matrix[j - 1][i] + 1, // insertion
+                matrix[j - 1][i - 1] + cost // substitution
+            );
+        }
+    }
+
+    return matrix[b.length][a.length];
+};
+
+export const getWordStatuses = (
+  originalWords: string[], 
+  spokenText: string
+): { statuses: WordStatus[], currentWordIndex: number } => {
+    const spokenWords = spokenText.split(/\s+/).filter(w => w.length > 0);
+  
+    const normalizedOriginals = originalWords.map(normalizeArabic);
+    const normalizedSpokens = spokenWords.map(normalizeArabic);
+
+    const statuses: WordStatus[] = Array(originalWords.length).fill('pending');
+    let lastCorrectIndex = -1;
+    let stopProcessing = false;
+
+    for (let i = 0; i < normalizedOriginals.length; i++) {
+        if (i >= spokenWords.length || stopProcessing) {
+            break;
+        }
+
+        const originalWord = normalizedOriginals[i];
+        const spokenWord = normalizedSpokens[i];
+        const distance = levenshteinDistance(originalWord, spokenWord);
+        
+        // Balanced threshold: allow 1 mistake for words of 4+ chars.
+        const threshold = originalWord.length >= 4 ? 1 : 0; 
+        
+        if (distance <= threshold) {
+            statuses[i] = 'correct';
+            lastCorrectIndex = i;
+        } else {
+            statuses[i] = 'incorrect';
+            stopProcessing = true;
+        }
+    }
+    
+    const currentWordIndex = lastCorrectIndex + 1;
+    if (currentWordIndex < originalWords.length) {
+        if (statuses[currentWordIndex] === 'pending') {
+            statuses[currentWordIndex] = 'current';
+        }
+    }
+
+    return { statuses, currentWordIndex };
+};
+
+export const getFullTextAndWordMap = (surah: Surah, range: {start: number, end: number}) => {
+    const ayahsInRange = surah.ayahs.slice(range.start - 1, range.end);
+    
+    let fullText = '';
+    const wordMap: {ayahId: number, wordIndex: number, originalWord: string}[] = [];
+    
+    ayahsInRange.forEach((ayah: Ayah) => {
+        const words = ayah.text.split(/\s+/).filter(Boolean);
+        words.forEach((word: string, index: number) => {
+            wordMap.push({
+                ayahId: ayah.id,
+                wordIndex: index,
+                originalWord: word
+            });
+        });
+        fullText += ayah.text + ' ';
+    });
+    
+    const originalWords = fullText.trim().split(/\s+/).filter(Boolean);
+    return {
+        fullText: fullText.trim(),
+        wordMap,
+        originalWords,
+    };
+};

@@ -1,27 +1,27 @@
 import { Reciter, Translation } from '../types';
 import { EN_SAHIH_TRANSLATION } from '../data/en_sahih';
 
+// Placeholder for new translation data.
+const EN_QARAI_TRANSLATION: Record<string, Record<string, string>> = {};
+
 export const RECITERS: Reciter[] = [
-    // Murattal Styles (Standard Pace)
-    { id: 'zephyr', name: 'Female: Murattal (Clear & Articulate)', voice: 'Zephyr', stylePrompt: 'Recite clearly and articulately in a Murattal style: ' },
-    { id: 'kore', name: 'Female: Murattal (Clear & Devotional)', voice: 'Kore', stylePrompt: 'Recite clearly with a devotional tone in a Murattal style: ' },
+    // Murattal Styles
+    { id: 'zephyr', name: 'Female: Murattal (Clear, Teacher-like)', voice: 'Zephyr', stylePrompt: 'Recite this Quranic verse as a devout Muslim woman sharing her love for the Quran. The delivery must be in a clear, articulate, and masterfully controlled Murattal style (Tarteel), gentle yet authoritative. It should be imbued with a deep sense of faith and reverence, featuring flawless Tajweed and crisp pronunciation (Makharij). The pace should be measured and steady, letting each word resonate with the tranquility of belief. Elongations (Madd) must be natural and balanced, avoiding exaggeration to ensure clarity and understanding: ' },
+    { id: 'kore', name: 'Female: Murattal (Serene & Reflective)', voice: 'Kore', stylePrompt: "Recite this Quranic verse in a serene, deeply moving, and devotional Murattal style, as if in personal prayer (salah). The female voice must be warm, sincere, and heartfelt, filled with humble submission (khushu') and reflecting a deep connection to the divine words. The pace should be gentle and flowing, inspiring tranquility and spiritual reflection. Ensure flawless Tajweed with a natural rhythm and controlled elongations (Madd), imbuing the delivery with a profound sense of peace and humility: " },
+    { id: 'puck-tadwir', name: 'Male: Tadwir (Moderate & Rhythmic)', voice: 'Puck', stylePrompt: 'Recite this Quranic verse in a masterful, flowing Tadwir style—a moderate pace between Tarteel and Hadar. The male voice should be powerful yet balanced, with a tone of unwavering faith and a clear, steady rhythm that aids contemplation. As a believer confidently proclaiming the truth, the delivery must feature flawless Tajweed, including all rules of Madd, Ghunnah, and articulation, making it ideal for regular prayer and deep reflection: ' },
+    { id: 'charon', name: 'Male: Tahqiq (Slow & Meticulous)', voice: 'Charon', stylePrompt: "Recite this Quranic verse in a flawless Tahqiq style, with the profound reverence of one who understands the weight and holiness of every syllable. The pace must be exceptionally slow, clear, and meticulous, focusing on the perfect articulation (Makharij) of every letter and Tajweed rule without error. The tone should be deeply reverent and authoritative, treating the text as the sacred word of Allah. Each sound must be given its full, correct measure and elongations (Madd) executed with precision and without exaggeration: " },
 
-    // Mujawwad Styles (Melodic)
-    { id: 'puck', name: 'Male: Mujawwad (Deep & Powerful)', voice: 'Puck', stylePrompt: 'Recite with a deep, powerful, and melodic voice: ' },
-    { id: 'fenrir', name: 'Male: Expressive Mujawwad (Rich & Melodic)', voice: 'Fenrir', stylePrompt: 'Recite with rich melody and emotional expression in a Mujawwad style: ' },
+    // Mujawwad Styles
+    { id: 'fenrir', name: 'Male: Mujawwad (Minshawi Inspired)', voice: 'Fenrir', stylePrompt: "Recite this Quranic verse in a masterful Mujawwad style. The voice must be deeply resonant, carrying a profound sense of 'huzn' (a beautiful, reverent sadness) that connects the listener's soul to the divine meaning. Employ virtuosic pacing with varied, meaningful pauses for deep contemplation. The delivery must have flawless, mastered Tajweed and powerful yet perfectly controlled elongations (Madd). Each letter must be articulated with supreme clarity, creating a recitation that is both authoritative and deeply moving: " },
+    { id: 'puck', name: 'Male: Mujawwad (Abdul Basit Inspired)', voice: 'Puck', stylePrompt: "Recite this Quranic verse in a grand, melodic Mujawwad style, with a tone of glorious celebration of Allah's words. The voice must be powerful, clear, and exceptionally controlled, with flawless Tajweed. Use dynamic vocal modulation and masterful breath control to create long, flowing, and emotionally expressive phrases filled with the joy of faith. The elongations (Madd) must be precise, powerful, and deeply resonant, without any unnatural stretching, to achieve a captivating and flawless performance: " },
 
-    // Pace-Based Styles
-    { id: 'charon', name: 'Male: Tahqiq (Slow & Meticulous)', voice: 'Charon', stylePrompt: 'Recite slowly and meticulously, for teaching purposes: ' },
-    { id: 'puck-tadwir', name: 'Male: Tadwir (Moderate Pace)', voice: 'Puck', stylePrompt: 'Recite at a moderate and steady pace: ' },
-
-    // Qira'at (Regional Methods)
-    { id: 'puck-warsh', name: 'Male: Warsh \'an Nafi\' (African Style)', voice: 'Puck', stylePrompt: 'Recite in the melodic Warsh style: ' },
-
-    // Instructional
-    { id: 'charon-instructional', name: 'Male: Instructional', voice: 'Charon', stylePrompt: 'Recite in a clear, instructional tone: ' },
+    // Other Styles
+    { id: 'puck-warsh', name: 'Male: Warsh (North African Style)', voice: 'Puck', stylePrompt: "Recite this Quranic verse with mastery, strictly following the specific rules of the Warsh 'an Nafi' recitation method, as passed down through generations of devout reciters. The delivery should be powerful and resonant, capturing the characteristic melodic flow of the North and West African style. Maintain flawless Tajweed on every letter, with each rule of pronunciation, merging, and elongation applied with perfection and authenticity, creating a sound that is both ancient and eternally relevant: " },
+    { id: 'charon-instructional', name: 'Male: Instructional (For Tajweed Students)', voice: 'Charon', stylePrompt: "Recite this Quranic verse as a patient teacher dedicated to passing on the sacred knowledge of Quranic recitation. The tone should be clear and instructional for teaching Tajweed. The pace must be moderate and deliberate, about 10-15% slower than a typical speaking pace, allowing a student to easily follow. The male voice should be authoritative yet encouraging, with a clear, higher-pitched tone. Articulate every letter and rule with exceptional clarity and precision, slightly emphasizing points of articulation for learning, but without unnatural exaggeration of elongations (Madd): " },
 ];
 
 export const TRANSLATIONS: Translation[] = [
-    { id: 'none', name: 'None', translator: 'None', data: null },
+    { id: 'none', name: 'None', translator: 'Display Arabic only', data: null },
     { id: 'en_sahih', name: 'English', translator: 'Sahih International', data: EN_SAHIH_TRANSLATION },
+    { id: 'en_qarai', name: 'English', translator: 'Ali Quli Qara\'i', data: EN_QARAI_TRANSLATION },
 ];

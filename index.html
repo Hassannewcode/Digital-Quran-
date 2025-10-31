@@ -28,6 +28,49 @@
         'GRAD' 0,
         'opsz' 24
       }
+      @keyframes fadeOutUp {
+        0% {
+          opacity: 1;
+          transform: translate(-50%, 0);
+        }
+        80% {
+          opacity: 1;
+          transform: translate(-50%, 0);
+        }
+        100% {
+          opacity: 0;
+          transform: translate(-50%, -10px);
+        }
+      }
+      .animate-fade-out-up {
+        animation: fadeOutUp 2s ease-in-out forwards;
+      }
+
+      /* Learning Mode Word Highlighting */
+      .highlight-pending {
+        color: inherit;
+        background-color: transparent;
+      }
+      .highlight-current {
+          background-color: rgba(59, 130, 246, 0.2); /* Soft blue */
+          border-radius: 8px;
+      }
+      .highlight-correct {
+          background-color: rgba(16, 185, 129, 0.25); /* Lighter green */
+          border-radius: 8px;
+      }
+      .highlight-incorrect {
+          background-color: rgba(239, 68, 68, 0.25); /* Lighter red */
+          border-radius: 8px;
+      }
+      .word-hidden {
+        color: transparent;
+        background-color: #e5e7eb; /* Light gray for light mode */
+        border-radius: 8px;
+      }
+      .dark .word-hidden {
+        background-color: #3f3f46; /* Zinc-700 for dark mode */
+      }
     </style>
   <script type="importmap">
 {
@@ -41,7 +84,7 @@
 </script>
 <script>
     // On page load or when changing themes, best to add inline in `head` to avoid FOUC
-    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    if (localStorage.getItem('theme') === '"dark"' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
       document.documentElement.classList.add('dark')
     } else {
       document.documentElement.classList.remove('dark')

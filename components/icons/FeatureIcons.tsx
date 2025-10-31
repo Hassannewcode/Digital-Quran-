@@ -17,3 +17,17 @@ export const NoteIcon: React.FC<NoteIconProps> = ({ hasNote }) => (
         edit_note
     </span>
 );
+
+export const RegenerateIcon: React.FC = () => (
+    <span className="material-symbols-outlined">
+        sync
+    </span>
+);
+
+export const LearnIcon: React.FC = () => (
+    <span className="material-symbols-outlined">school</span>
+);
+
+export const MicrophoneIcon: React.FC = () => (
+    <span className="material-symbols-outlined">mic</span>
+);

@@ -12,15 +12,18 @@ export interface Surah {
 }
 
 export type PlayingStatus = 'idle' | 'loading' | 'playing' | 'error';
+export type PlayingMode = 'single' | 'verse-by-verse' | 'continuous' | 'full-surah' | 'asap-continuous';
+export type LearningModeType = 'none' | 'highlight' | 'memory';
 
 export type PlayingState = {
     status: 'idle';
 } | {
-    status: 'loading' | 'playing' | 'error';
+    status: PlayingStatus;
     surahId: number;
     ayahId: number;
-    continuous?: boolean;
-}
+    mode: PlayingMode;
+};
+
 
 export interface Reciter {
     id: string;

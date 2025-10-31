@@ -1,18 +1,20 @@
 import React from 'react';
-import { Surah, Ayah, PlayingState, Note, Reciter, Translation } from '../types';
+import { Surah, Ayah, PlayingState, Note, Reciter, Translation, PlayingMode, LearningModeType } from '../types';
 import AyahView from './AyahView';
 import PlaybackControls from './PlaybackControls';
 import SettingsPanel from './SettingsPanel';
 
 interface SurahDetailProps {
   surah: Surah;
-  onPlay: (ayah: Ayah, surahId: number, continuous?: boolean) => void;
+  onPlay: (ayah: Ayah, surahId: number) => void;
+  onStop: () => void;
   playingState: PlayingState;
   isBookmarked: (surahId: number, ayahId: number) => boolean;
   getNoteForAyah: (surahId: number, ayahId: number) => string;
   onToggleBookmark: (surahId: number, ayahId: number) => void;
   onSaveNote: (surahId: number, ayahId: number, text: string) => void;
-  onToggleSurahPlay: (surah: Surah) => void;
+  onPlayRange: (surah: Surah, mode: 'verse-by-verse' | 'continuous' | 'full-surah' | 'asap-continuous') => void;
+  onStartLearning: (surah: Surah, range: { start: number, end: number }, mode: LearningModeType) => void;
   notes: Note[];
   reciters: Reciter[];
   translations: Translation[];
@@ -20,28 +22,44 @@ interface SurahDetailProps {
   selectedTranslationId: string;
   onReciterChange: (id: string) => void;
   onTranslationChange: (id: string) => void;
+  playbackRange: { start: number; end: number };
+  onPlaybackRangeChange: (range: { start: number; end: number }) => void;
+  repeatCount: number;
+  onRepeatCountChange: (count: number) => void;
+  isInfinite: boolean;
+  onIsInfiniteChange: (isInfinite: boolean) => void;
+  onRegenerateAyah: (surahId: number, ayahId: number) => void;
 }
 
-const AYAH_THRESHOLD_FOR_CONTINUOUS_PLAY = 200;
+const AYAH_THRESHOLD_FOR_CONTINUOUS_PLAY = 54;
 
 const SurahDetail: React.FC<SurahDetailProps> = ({ 
     surah, 
     onPlay, 
+    onStop,
     playingState,
     isBookmarked,
     getNoteForAyah,
     onToggleBookmark,
     onSaveNote,
-    onToggleSurahPlay,
+    onPlayRange,
+    onStartLearning,
     notes,
     reciters,
     translations,
     selectedReciterId,
     selectedTranslationId,
     onReciterChange,
-    onTranslationChange
+    onTranslationChange,
+    playbackRange,
+    onPlaybackRangeChange,
+    repeatCount,
+    onRepeatCountChange,
+    isInfinite,
+    onIsInfiniteChange,
+    onRegenerateAyah
 }) => {
-  const isLargeSurah = surah.ayahs.length > AYAH_THRESHOLD_FOR_CONTINUOUS_PLAY;
+  const isLargeSurahForContinuous = surah.ayahs.length > AYAH_THRESHOLD_FOR_CONTINUOUS_PLAY;
   const surahNotes = notes
     .filter(note => note.surahId === surah.id)
     .sort((a, b) => a.ayahId - b.ayahId);
@@ -57,6 +75,12 @@ const SurahDetail: React.FC<SurahDetailProps> = ({
         onReciterChange={onReciterChange}
         onTranslationChange={onTranslationChange}
     />
+    {selectedTranslationId === 'none' && (
+        <div className="my-6 p-4 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 rounded-r-lg text-blue-700 dark:text-blue-300">
+          <p className="font-semibold">View Translation</p>
+          <p className="text-sm">To display an English translation, please choose one from the dropdown menu above.</p>
+        </div>
+      )}
     <div className={`flex flex-col ${hasNotes ? 'lg:flex-row-reverse' : ''} gap-8 items-start`}>
       {hasNotes && (
         <aside className="w-full lg:w-1/3">
@@ -77,8 +101,15 @@ const SurahDetail: React.FC<SurahDetailProps> = ({
         <PlaybackControls 
           surah={surah}
           playingState={playingState}
-          onTogglePlay={onToggleSurahPlay}
-          isLarge={isLargeSurah}
+          onPlayRange={onPlayRange}
+          onStartLearning={(mode) => onStartLearning(surah, playbackRange, mode)}
+          isLargeForContinuous={isLargeSurahForContinuous}
+          playbackRange={playbackRange}
+          onPlaybackRangeChange={onPlaybackRangeChange}
+          repeatCount={repeatCount}
+          onRepeatCountChange={onRepeatCountChange}
+          isInfinite={isInfinite}
+          onIsInfiniteChange={onIsInfiniteChange}
         />
         <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-md divide-y divide-slate-200 dark:divide-zinc-800">
           {surah.id !== 1 && surah.id !== 9 && (
@@ -93,12 +124,15 @@ const SurahDetail: React.FC<SurahDetailProps> = ({
                 key={ayah.id}
                 ayah={ayah}
                 surah={surah}
-                onPlay={() => onPlay(ayah, surah.id, false)}
+                onPlay={() => onPlay(ayah, surah.id)}
+                onStop={onStop}
+                onStartLearning={() => onStartLearning(surah, {start: ayah.id, end: ayah.id}, 'highlight')}
                 playingState={playingState}
                 isBookmarked={isBookmarked(surah.id, ayah.id)}
                 note={getNoteForAyah(surah.id, ayah.id)}
                 onToggleBookmark={() => onToggleBookmark(surah.id, ayah.id)}
                 onSaveNote={(text) => onSaveNote(surah.id, ayah.id, text)}
+                onRegenerate={() => onRegenerateAyah(surah.id, ayah.id)}
             />
           ))}
         </div>
