@@ -33,7 +33,7 @@ export async function generateSpeech(
     const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
 
     if (!base64Audio) {
-      console.error("API response did not contain audio data.", response);
+      console.error("API response did not contain audio data.", JSON.stringify(response, null, 2));
       throw new Error("No audio data returned from API.");
     }
 
