@@ -14,6 +14,8 @@ interface SettingsViewProps {
     onPitchChange: (pitch: number) => void;
     speed: number;
     onSpeedChange: (speed: number) => void;
+    installPrompt: Event | null;
+    handleInstall: () => void;
 }
 
 const inspirationLinks = [
@@ -26,7 +28,7 @@ const inspirationLinks = [
     { name: 'Corpus.Quran.com (The Quranic Arabic Corpus)', url: 'https://corpus.quran.com' },
 ];
 
-const SettingsView: React.FC<SettingsViewProps> = (props) => {
+const SettingsView: React.FC<SettingsViewProps> = ({ installPrompt, handleInstall, ...props }) => {
   return (
     <div className="max-w-4xl mx-auto space-y-12 text-slate-700 dark:text-zinc-300">
       
@@ -40,6 +42,23 @@ const SettingsView: React.FC<SettingsViewProps> = (props) => {
       </section>
 
       <SettingsPanel {...props} />
+
+      {installPrompt && (
+        <section>
+          <h2 className="text-2xl font-bold border-b-2 border-blue-500 pb-2 mb-6">Install Application</h2>
+          <div className="p-6 bg-white dark:bg-zinc-900 rounded-lg shadow-md border dark:border-zinc-800 space-y-4 text-center">
+            <p className="leading-relaxed">For the best experience, install the Quranic Reciter on your device. This enables offline access and a native app feel.</p>
+            <button
+              onClick={handleInstall}
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 transition-colors"
+              aria-label="Install Quranic Reciter app"
+            >
+              <span className="material-symbols-outlined">download</span>
+              <span>Install App</span>
+            </button>
+          </div>
+        </section>
+      )}
 
       {/* Section 1: Recitation Styles */}
       <section>

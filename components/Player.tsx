@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent, useRef, useEffect } from 'react';
 import { Ayah, PlayingState, Surah } from '../types';
 import { PlayIcon, StopIcon, LoadingSpinner, PreviousIcon, NextIcon, CloseIcon } from './icons/PlaybackIcons';
 import PlaybackSettingsModal from './PlaybackSettingsModal';
@@ -95,13 +95,13 @@ const Player: React.FC<PlayerProps> = ({
                         <span className="text-xs w-10 text-center">{status === 'loading' ? '--:--' : formatTime(totalTime)}</span>
                     </div>
 
-                    <div className="flex items-center justify-between mt-1">
-                        <div className="w-1/4">
+                    <div className="flex items-center justify-between mt-1 gap-2">
+                        <div className="flex-1 min-w-0">
                             <p className="font-bold truncate text-sm">{surah.name} ({playingState.ayahId})</p>
                             <p className="text-xs text-slate-300 truncate">{getSubtitle()}</p>
                         </div>
                         
-                        <div className="flex items-center gap-3">
+                        <div className="flex-shrink-0 flex items-center gap-1 sm:gap-2">
                             <button onClick={() => setIsSettingsOpen(true)} className="p-2 text-slate-300 hover:text-white transition-colors" title="Playback Settings">
                                 <span className="material-symbols-outlined">more_horiz</span>
                             </button>
@@ -118,7 +118,7 @@ const Player: React.FC<PlayerProps> = ({
                             <button onClick={onNext} disabled={mode === 'full-surah'} className="p-2 text-slate-300 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                                 <NextIcon />
                             </button>
-                            <div className="group flex items-center gap-2">
+                             <div className="group hidden sm:flex items-center gap-2">
                                 <span className="material-symbols-outlined text-slate-300">volume_up</span>
                                 <input
                                     type="range"
@@ -132,7 +132,7 @@ const Player: React.FC<PlayerProps> = ({
                             </div>
                         </div>
 
-                        <div className="w-1/4 flex items-center justify-end">
+                        <div className="flex-1 flex items-center justify-end">
                             <button onClick={onClose} className="p-2 text-slate-300 hover:text-white transition-colors" title="Close Player">
                                 <CloseIcon />
                             </button>

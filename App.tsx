@@ -30,6 +30,9 @@ const App: React.FC = () => {
   const [currentAyah, setCurrentAyah] = useState<Ayah | null>(null);
   const [toastMessage, setToastMessage] = useState<string>('');
   const [learningSession, setLearningSession] = useState<LearningSession | null>(null);
+  const [installPrompt, setInstallPrompt] = useState<Event | null>(null);
+  const isInstalled = useRef(false);
+
 
   const [playbackRange, setPlaybackRange] = useState<{ start: number; end: number }>({ start: 1, end: 1 });
   const [repeatCount, setRepeatCount] = useState(0); // 0 = off
@@ -74,6 +77,37 @@ const App: React.FC = () => {
         setSpeed(selectedReciter.defaultSpeed ?? 1.0);
     }
   }, [selectedReciter, setPitch, setSpeed]);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      if (!isInstalled.current) {
+        setInstallPrompt(e);
+      }
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+
+    window.addEventListener('appinstalled', () => {
+      isInstalled.current = true;
+      setInstallPrompt(null);
+    });
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler);
+      window.removeEventListener('appinstalled', () => {});
+    };
+  }, []);
+
+  const handleInstall = useCallback(() => {
+    if (!installPrompt) return;
+    (installPrompt as any).prompt();
+    (installPrompt as any).userChoice.then((choiceResult: { outcome: 'accepted' | 'dismissed' }) => {
+      if (choiceResult.outcome === 'accepted') {
+        isInstalled.current = true;
+      }
+      setInstallPrompt(null);
+    });
+  }, [installPrompt]);
 
 
   useEffect(() => {
@@ -428,13 +462,13 @@ const App: React.FC = () => {
       audioContext.suspend();
       stopElapsedTimer();
       pauseTimeRef.current = audioContext.currentTime;
-      setPlayingState({ ...playingState as Exclude<PlayingState, {status: 'idle'}>, status: 'paused' });
+      setPlayingState(ps => ({ ...ps as Exclude<PlayingState, {status: 'idle'}>, status: 'paused' }));
     } else if (audioContext.state === 'suspended' && playingState.status === 'paused') {
       audioContext.resume();
       const pauseDuration = audioContext.currentTime - pauseTimeRef.current;
       playbackStartTimeRef.current += pauseDuration;
       startElapsedTimer();
-      setPlayingState({ ...playingState as Exclude<PlayingState, {status: 'idle'}>, status: 'playing' });
+      setPlayingState(ps => ({ ...ps as Exclude<PlayingState, {status: 'idle'}>, status: 'playing' }));
     }
   }, [playingState, stopElapsedTimer, startElapsedTimer]);
   
@@ -463,7 +497,7 @@ const App: React.FC = () => {
     playAudioBuffer(audioBufferRef.current, time);
     // Ensure state is playing, in case it was paused
     if (playingState.status === 'paused') {
-        setPlayingState({ ...playingState, status: 'playing' });
+        setPlayingState(ps => ({ ...ps as Exclude<PlayingState, {status: 'idle'}>, status: 'playing' }));
     }
   };
   
@@ -578,6 +612,8 @@ const App: React.FC = () => {
                 onPitchChange={setPitch}
                 speed={speed}
                 onSpeedChange={setSpeed}
+                installPrompt={installPrompt}
+                handleInstall={handleInstall}
             />;
         case 'list':
         default:
