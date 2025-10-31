@@ -1,8 +1,5 @@
-
-
 import React, { useState, ChangeEvent } from 'react';
-// Fix: Import `PlayingMode` type to resolve TypeScript error.
-import { Ayah, PlayingState, Surah, PlayingMode } from '../types';
+import { Ayah, PlayingState, Surah } from '../types';
 import { PlayIcon, StopIcon, LoadingSpinner, PreviousIcon, NextIcon, CloseIcon } from './icons/PlaybackIcons';
 import PlaybackSettingsModal from './PlaybackSettingsModal';
 
@@ -40,8 +37,6 @@ const Player: React.FC<PlayerProps> = ({
     onClose, onPlayPause, onNext, onPrevious, onSeek, volume, onVolumeChange,
     ...modalProps
 }) => {
-    // Fix: Removed unnecessary type assertion. The component is only rendered when `playingState` is not 'idle',
-    // so TypeScript can correctly infer the type and its properties like `mode`.
     const { status, mode } = playingState;
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const isSeeking = React.useRef(false);
@@ -64,13 +59,15 @@ const Player: React.FC<PlayerProps> = ({
     const progress = totalTime > 0 ? (elapsedTime / totalTime) * 100 : 0;
     const currentSliderValue = isSeeking.current ? seekValue : elapsedTime;
 
-    const isFullSurahMode = mode === 'full-surah';
+    // A single audio buffer is only available for seeking in non-chunked full-surah mode.
+    const isSeekable = mode === 'full-surah' && totalTime > 0 && surah.ayahs.filter(a => a.id >= modalProps.playbackRange.start && a.id <= modalProps.playbackRange.end).length <= 36;
+
 
     const getSubtitle = () => {
         if (status === 'loading') {
             return "Generating audio...";
         }
-        if (isFullSurahMode) {
+        if (mode === 'full-surah') {
             return 'Continuous Recitation';
         }
         return ayah.translation;
@@ -90,9 +87,9 @@ const Player: React.FC<PlayerProps> = ({
                             onChange={handleSeekChange}
                             onMouseDown={handleSeekMouseDown}
                             onMouseUp={handleSeekMouseUp}
-                            disabled={!isFullSurahMode}
-                            className="w-full h-1.5 bg-slate-600 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-md"
-                            style={{ backgroundSize: `${isFullSurahMode ? progress : 0}% 100%` }}
+                            disabled={!isSeekable}
+                            className="w-full h-1.5 bg-slate-600 rounded-lg appearance-none cursor-pointer disabled:cursor-not-allowed [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-md [&:disabled::-webkit-slider-thumb]:bg-slate-400"
+                            style={{ backgroundSize: `${isSeekable ? progress : 0}% 100%` }}
                         />
                         <span className="text-xs w-10 text-center">{status === 'loading' ? '--:--' : formatTime(totalTime)}</span>
                     </div>
@@ -107,7 +104,7 @@ const Player: React.FC<PlayerProps> = ({
                             <button onClick={() => setIsSettingsOpen(true)} className="p-2 text-slate-300 hover:text-white transition-colors" title="Playback Settings">
                                 <span className="material-symbols-outlined">more_horiz</span>
                             </button>
-                            <button onClick={onPrevious} disabled={isFullSurahMode} className="p-2 text-slate-300 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                            <button onClick={onPrevious} disabled={mode === 'full-surah'} className="p-2 text-slate-300 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                                 <PreviousIcon />
                             </button>
                             <button 
@@ -117,7 +114,7 @@ const Player: React.FC<PlayerProps> = ({
                             >
                                 {status === 'loading' ? <LoadingSpinner /> : status === 'playing' ? <StopIcon /> : <PlayIcon />}
                             </button>
-                            <button onClick={onNext} disabled={isFullSurahMode} className="p-2 text-slate-300 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                            <button onClick={onNext} disabled={mode === 'full-surah'} className="p-2 text-slate-300 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                                 <NextIcon />
                             </button>
                             <div className="group flex items-center gap-2">

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Surah, Ayah, PlayingState, Reciter, Translation, Bookmark, Note, PlayingMode, LearningModeType, View } from './types';
 import { getSurahsWithTranslation } from './services/quranService';
@@ -62,6 +61,10 @@ const App: React.FC = () => {
   const playbackStartTimeRef = useRef(0);
   const pauseTimeRef = useRef(0);
 
+  // Refs for managing chunked playback
+  const chunkQueueRef = useRef<Array<{start: number, end: number}>>([]);
+  const isChunkedPlaybackRef = useRef(false);
+
   const selectedTranslation = useMemo(() => TRANSLATIONS.find(t => t.id === selectedTranslationId), [selectedTranslationId]);
   const selectedReciter = useMemo(() => RECITERS.find(r => r.id === selectedReciterId), [selectedReciterId]);
   
@@ -79,7 +82,7 @@ const App: React.FC = () => {
     } else {
       document.documentElement.classList.remove('dark');
     }
-  }, []);
+  }, [theme]);
 
   useEffect(() => {
     setSurahs(getSurahsWithTranslation(selectedTranslation?.data || null));
@@ -93,7 +96,7 @@ const App: React.FC = () => {
             if(ayah) setCurrentAyah(ayah);
         }
     }
-  }, [selectedTranslation]);
+  }, [selectedTranslation, playerSurah, currentAyah]);
 
   useEffect(() => {
     if (toastMessage) {
@@ -143,6 +146,9 @@ const App: React.FC = () => {
     stopElapsedTimer();
     setElapsedTime(0);
     setTotalTime(0);
+    // Reset chunking state on any stop
+    chunkQueueRef.current = [];
+    isChunkedPlaybackRef.current = false;
     if (playingState.status !== 'idle') {
       setPlayingState({ status: 'idle' });
       setCurrentAyah(null);
@@ -235,9 +241,9 @@ const App: React.FC = () => {
         const audioBuffer = await decodeAudioData(audioData, audioContext, 24000, 1);
         audioBufferRef.current = audioBuffer;
         
-        if (!isContinuation) {
-            setTotalTime(audioBuffer.duration);
-        }
+        // For chunked playback, totalTime should be duration of the whole Surah, but we can't know that.
+        // For now, totalTime will be for the current chunk/ayah.
+        setTotalTime(audioBuffer.duration);
 
         const source = playAudioBuffer(audioBuffer);
         
@@ -245,76 +251,98 @@ const App: React.FC = () => {
 
         source.onended = () => {
             if (audioSourceRef.current !== source) return;
-            
-            const isLastAyahInRange = ayah.id === playbackRange.end;
+
             const shouldLoop = isInfinite || playCountRef.current < repeatCount + 1;
             
-            if (mode !== 'single' && shouldLoop && isLastAyahInRange) {
-                 playCountRef.current += 1;
-                 const delay = mode === 'verse-by-verse' ? 500 : 250;
-                 playNextTimeoutRef.current = window.setTimeout(() => {
-                    handlePlayRangeRef.current?.(surah, mode, true);
-                 }, delay);
-            } else if (mode === 'verse-by-verse' && !isLastAyahInRange) {
-                const currentAyahIndex = surah.ayahs.findIndex(a => a.id === ayah.id);
-                if (currentAyahIndex > -1 && currentAyahIndex < surah.ayahs.length - 1) {
-                    const nextAyah = surah.ayahs[currentAyahIndex + 1];
-                    const nextCacheKey = `${selectedReciterId}-${surah.id}-${nextAyah.id}`;
+            // --- 1. Handle Chunked Full-Surah playback ---
+            if (isChunkedPlaybackRef.current && mode === 'full-surah') {
+                if (chunkQueueRef.current.length > 0) {
+                    // Play next chunk in the queue
                     playNextTimeoutRef.current = window.setTimeout(() => {
-                        handlePlayAyah(nextAyah, surah, mode, nextCacheKey, true);
-                    }, 500);
+                        handlePlayRangeRef.current?.(surah, 'full-surah', true);
+                    }, 250);
                 } else {
-                    stopPlayback();
+                    // Last chunk finished, check for looping entire range
+                    if (shouldLoop) {
+                        playCountRef.current += 1;
+                        // isContinuation = true to not reset the play counter, but queue will be rebuilt because it's empty
+                        playNextTimeoutRef.current = window.setTimeout(() => {
+                            handlePlayRangeRef.current?.(surah, 'full-surah', true);
+                        }, 250);
+                    } else {
+                        stopPlayback();
+                    }
                 }
-            } else if (mode === 'single' && shouldLoop) {
-                 playCountRef.current += 1;
-                 playNextTimeoutRef.current = window.setTimeout(() => {
-                    handlePlayAyah(ayah, surah, 'single', cacheKey, true);
-                }, 500);
+                return; // Done with chunked logic
             }
-            else {
-                 stopPlayback();
+
+            // --- 2. Handle other modes ---
+            const isLastAyahInPlaybackRange = ayah.id >= playbackRange.end;
+        
+            // 2a. Verse-by-verse progression
+            if (mode === 'verse-by-verse' && !isLastAyahInPlaybackRange) {
+                const currentAyahIndex = surah.ayahs.findIndex(a => a.id === ayah.id);
+                if (currentAyahIndex > -1) {
+                    const nextAyah = surah.ayahs[currentAyahIndex + 1];
+                    // Check if next ayah exists and is within the selected range
+                    if (nextAyah && nextAyah.id <= playbackRange.end) {
+                        const nextCacheKey = `${selectedReciterId}-${surah.id}-${nextAyah.id}`;
+                        playNextTimeoutRef.current = window.setTimeout(() => {
+                            handlePlayAyah(nextAyah, surah, mode, nextCacheKey, true);
+                        }, 500);
+                        return;
+                    }
+                }
             }
+            
+            // 2b. Looping for single, verse-by-verse (end of range), and non-chunked full-surah
+            if (shouldLoop && (mode === 'single' || isLastAyahInPlaybackRange)) {
+                playCountRef.current += 1;
+                const delay = mode === 'verse-by-verse' ? 500 : 250;
+                playNextTimeoutRef.current = window.setTimeout(() => {
+                    if (mode === 'single') {
+                         handlePlayAyah(ayah, surah, 'single', cacheKey, true);
+                    } else { // verse-by-verse or full-surah
+                         handlePlayRangeRef.current?.(surah, mode, true);
+                    }
+                }, delay);
+                return;
+            }
+            
+            // --- 3. Default: stop playback ---
+            stopPlayback();
         };
 
     } catch (error) {
         console.error("Error playing audio:", error);
         let message = "Audio playback failed. Please try again.";
         if (error instanceof Error) {
-            if (error.message.includes("No audio data returned")) {
-                message = "Audio generation failed. The voice may be busy or the Surah is too long for this mode.";
-            } else if (error.message.includes("API_KEY is not configured")) {
+            const errorMessage = error.message.toLowerCase();
+            if (errorMessage.includes("no audio data returned")) {
+                message = "Audio generation failed. The AI voice may be busy or the selected text is too long for this mode.";
+            } else if (errorMessage.includes("api_key")) {
                 message = "API Key is not configured for this deployment.";
+            } else if (errorMessage.includes("quota")) {
+                 message = "API quota exceeded. Please check your billing or try again later.";
+            } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+                 message = "Network error. Please check your internet connection.";
             }
         }
         setToastMessage(message);
         setPlayingState({ status: 'error', surahId: surah.id, ayahId: ayah.id, mode });
-        stopPlayback();
     }
   }, [playingState.status, stopPlayback, selectedReciterId, volume, playAudioBuffer, playbackRange.end, isInfinite, repeatCount, pitch, speed]);
 
   const handlePlayRange = useCallback((surah: Surah, mode: 'verse-by-verse' | 'full-surah', isContinuation = false) => {
-    if (!isContinuation) stopPlayback();
+    if (!isContinuation) {
+      stopPlayback();
+      playCountRef.current = 1;
+    }
     
     const BISMILLAH = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ';
     const addBismillah = surah.id !== 9 && playbackRange.start > 1 && !isContinuation;
 
-    if (mode === 'full-surah') {
-        const ayahsInRange = surah.ayahs.filter(a => a.id >= playbackRange.start && a.id <= playbackRange.end);
-        if (ayahsInRange.length === 0) return;
-        let combinedText = ayahsInRange.map(a => a.text.replace(/[۞۩]/g, '').trim()).join(' ');
-        
-        let cacheKey = `${selectedReciterId}-${surah.id}-${playbackRange.start}-${playbackRange.end}`;
-        
-        if (addBismillah) {
-            combinedText = BISMILLAH + combinedText;
-            cacheKey += '-with-bismillah';
-        }
-
-        const fakeAyah: Ayah = { id: playbackRange.start, text: combinedText, translation: ayahsInRange[0].translation };
-        handlePlayAyah(fakeAyah, surah, 'full-surah', cacheKey, isContinuation);
-
-    } else { // verse-by-verse
+    if (mode === 'verse-by-verse') {
         const firstAyahInRange = surah.ayahs.find(a => a.id === playbackRange.start);
         if (firstAyahInRange) {
             const ayahToPlay = { ...firstAyahInRange };
@@ -327,6 +355,52 @@ const App: React.FC = () => {
             
             handlePlayAyah(ayahToPlay, surah, mode, cacheKey, isContinuation);
         }
+    } else { // 'full-surah' mode
+        const CHUNK_SIZE = 31;
+        const CHUNK_THRESHOLD = 36;
+        
+        // Rebuild queue for a new session or a loop restart (when queue is empty)
+        if (chunkQueueRef.current.length === 0) { 
+            const totalVerses = playbackRange.end - playbackRange.start + 1;
+            isChunkedPlaybackRef.current = totalVerses > CHUNK_THRESHOLD;
+
+            if (isChunkedPlaybackRef.current) {
+                let currentStart = playbackRange.start;
+                while (currentStart <= playbackRange.end) {
+                    const remaining = playbackRange.end - currentStart + 1;
+                    const currentEnd = (remaining <= CHUNK_THRESHOLD) 
+                        ? playbackRange.end 
+                        : currentStart + CHUNK_SIZE - 1;
+                    chunkQueueRef.current.push({ start: currentStart, end: currentEnd });
+                    currentStart = currentEnd + 1;
+                }
+            } else {
+                chunkQueueRef.current.push({ start: playbackRange.start, end: playbackRange.end });
+            }
+        }
+        
+        const nextChunk = chunkQueueRef.current.shift();
+        if (!nextChunk) {
+            stopPlayback();
+            return;
+        }
+
+        const ayahsInChunk = surah.ayahs.filter(a => a.id >= nextChunk.start && a.id <= nextChunk.end);
+        if (ayahsInChunk.length === 0) return;
+
+        let combinedText = ayahsInChunk.map(a => a.text.replace(/[۞۩]/g, '').trim()).join(' ');
+        
+        let cacheKey = `${selectedReciterId}-${surah.id}-${nextChunk.start}-${nextChunk.end}`;
+        
+        // Add Bismillah only for the very first chunk of a new playback session.
+        if (addBismillah && nextChunk.start === playbackRange.start) {
+            combinedText = BISMILLAH + combinedText;
+            cacheKey += '-with-bismillah';
+        }
+
+        const fakeAyah: Ayah = { id: nextChunk.start, text: combinedText, translation: ayahsInChunk[0]?.translation || '' };
+        // The first call from user has isContinuation=false. All subsequent internal calls (next chunk, loop) should be continuations.
+        handlePlayAyah(fakeAyah, surah, 'full-surah', cacheKey, true);
     }
   }, [stopPlayback, playbackRange.start, playbackRange.end, selectedReciterId, handlePlayAyah]);
   
@@ -341,15 +415,7 @@ const App: React.FC = () => {
   };
   
   const handleThemeToggle = () => {
-    setTheme(prev => {
-        const newTheme = prev === 'light' ? 'dark' : 'light';
-        if (newTheme === 'dark') {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-        return newTheme;
-    });
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
   };
 
   const handleNavigate = (newView: View) => {
@@ -361,29 +427,24 @@ const App: React.FC = () => {
     window.scrollTo(0, 0);
   }
 
-  // Fix: The previous implementation of `handlePlayPause` was not type-safe and could lead to a corrupted state object, causing crashes elsewhere.
-  // This version is type-safe by ensuring `playingState` is not stale and correctly narrowed before spreading.
   const handlePlayPause = useCallback(() => {
-    if (!audioContextRef.current) return;
+    if (!audioContextRef.current || playingState.status === 'idle') return;
     const audioContext = audioContextRef.current;
     
     if (audioContext.state === 'running' && playingState.status === 'playing') {
       audioContext.suspend();
       stopElapsedTimer();
       pauseTimeRef.current = audioContext.currentTime;
-      setPlayingState({ ...playingState, status: 'paused' });
+      setPlayingState({ ...playingState as Exclude<PlayingState, {status: 'idle'}>, status: 'paused' });
     } else if (audioContext.state === 'suspended' && playingState.status === 'paused') {
       audioContext.resume();
       const pauseDuration = audioContext.currentTime - pauseTimeRef.current;
       playbackStartTimeRef.current += pauseDuration;
       startElapsedTimer();
-      setPlayingState({ ...playingState, status: 'playing' });
+      setPlayingState({ ...playingState as Exclude<PlayingState, {status: 'idle'}>, status: 'playing' });
     }
   }, [playingState, stopElapsedTimer, startElapsedTimer]);
   
-  // FIX: Restructured conditional to use a guard clause. This helps TypeScript correctly
-  // narrow the type of `playingState`, resolving the error where `mode` was not
-  // found on the 'idle' state.
   const changeVerse = useCallback((direction: 'next' | 'previous') => {
     if (playingState.status === 'idle' || !playerSurah) {
       return;
@@ -405,11 +466,11 @@ const App: React.FC = () => {
   }, [playerSurah, playingState, selectedReciterId, handlePlayAyah, stopPlayback]);
 
   const handleSeek = (time: number) => {
-    if (playingState.status === 'idle' || playingState.mode !== 'full-surah' || !audioBufferRef.current || !audioContextRef.current) return;
+    if (playingState.status === 'idle' || isChunkedPlaybackRef.current || !audioBufferRef.current || !audioContextRef.current) return;
     playAudioBuffer(audioBufferRef.current, time);
     // Ensure state is playing, in case it was paused
     if (playingState.status === 'paused') {
-        setPlayingState(prev => ({ ...prev as Exclude<PlayingState, {status: 'idle'}>, status: 'playing' }));
+        setPlayingState({ ...playingState, status: 'playing' });
     }
   };
   
@@ -520,7 +581,6 @@ const App: React.FC = () => {
                 selectedTranslationId={selectedTranslationId}
                 onReciterChange={setSelectedReciterId}
                 onTranslationChange={setSelectedTranslationId}
-                // Fix: Pass pitch and speed controls to SettingsView.
                 pitch={pitch}
                 onPitchChange={setPitch}
                 speed={speed}
@@ -555,7 +615,7 @@ const App: React.FC = () => {
       )}
       <footer className="text-center py-6 text-slate-500 dark:text-zinc-500 text-sm">
         <p>Quranic Reciter - Experience the Holy Quran with AI-powered recitation.</p>
-        <p className="mt-2">Text from Tanzil Project. Audio by Google Gemini.</p>
+        <p className="mt-2">Text from Tanzil Project. AI-powered recitation by Google Gemini.</p>
       </footer>
       {playingState.status !== 'idle' && playerSurah && currentAyah && (
         <Player

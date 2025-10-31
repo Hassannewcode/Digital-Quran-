@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Ayah, PlayingState, Surah } from '../types';
 import { LoadingSpinner, PlayIcon, StopIcon, ErrorIcon } from './icons/PlaybackIcons';
@@ -125,7 +126,7 @@ const AyahView: React.FC<AyahViewProps> = ({
                 </button>
             </div>
             <div className="flex-1">
-                <p dir="rtl" className="text-3xl md:text-4xl leading-loose font-amiri-quran text-right text-slate-900 dark:text-zinc-100 mb-4">
+                <p dir="rtl" className="text-3xl md:text-4xl font-amiri-quran text-right text-slate-900 dark:text-zinc-100 mb-4" style={{ lineHeight: 2.8 }}>
                     {ayah.text}
                      <span className="text-2xl font-amiri-quran select-none text-blue-500 dark:text-blue-400 mx-2">﴿{ayah.id.toLocaleString('ar')}﴾</span>
                 </p>

@@ -8,8 +8,8 @@ export const RECITERS: Reciter[] = [
         name: 'Female: Murattal (Clear, Teacher-like)', 
         voice: 'Zephyr', 
         stylePrompt: "Recite with a clear, confident, and sincere female voice. The style should be Murattal, with perfect Tajweed, focusing on clear articulation and a measured pace suitable for teaching and contemplation. The tone should be beautiful, reverent, and full of humility (Khushu):",
-        defaultPitch: 1.0,
-        defaultSpeed: 1.0,
+        defaultPitch: 0.98,
+        defaultSpeed: 0.98,
     },
     { 
         id: 'kore', 

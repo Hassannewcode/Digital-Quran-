@@ -53,6 +53,7 @@ const RecitationPractice: React.FC<RecitationPracticeProps> = ({ session, onClos
   }, [originalWords, transcript]);
   
   const currentAyahId = (currentWordIndex < wordMap.length) ? wordMap[currentWordIndex].ayahId : null;
+  const progress = originalWords.length > 0 ? ((correctCount + incorrectCount) / originalWords.length) * 100 : 0;
 
   useEffect(() => {
     const wordEl = contentRef.current?.querySelector(`[data-word-index='${currentWordIndex}']`);
@@ -117,7 +118,18 @@ const RecitationPractice: React.FC<RecitationPracticeProps> = ({ session, onClos
         </button>
       </header>
 
-      <main ref={contentRef} className="flex-1 overflow-y-auto py-8">
+      <div className="flex-shrink-0 px-4 sm:px-8 pt-4">
+        <div className="w-full bg-slate-200 dark:bg-zinc-700 rounded-full h-2.5">
+          <div className="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style={{ width: `${progress}%` }}></div>
+        </div>
+        {!isListening && !score && (
+          <p className="text-center text-sm text-slate-500 dark:text-zinc-400 mt-2">
+            Press 'Recite' and begin reading. Your words will be highlighted as you speak.
+          </p>
+        )}
+      </div>
+
+      <main ref={contentRef} className="flex-1 overflow-y-auto pt-4 pb-8">
         <div dir="rtl" className="text-3xl md:text-4xl lg:text-5xl leading-loose font-amiri-quran text-right max-w-4xl mx-auto">
           {ayahsInRange.map(ayah => {
             const isCurrentAyah = ayah.id === currentAyahId;
@@ -156,18 +168,22 @@ const RecitationPractice: React.FC<RecitationPracticeProps> = ({ session, onClos
                 </button>
                  <button
                     onClick={handleTryAgain}
-                    className="flex items-center gap-2 px-4 py-3 rounded-lg bg-slate-200 text-slate-700 dark:bg-zinc-700 dark:text-zinc-200 font-semibold transition-colors text-lg hover:bg-slate-300 dark:hover:bg-zinc-600"
+                    className="flex items-center gap-2 px-4 py-3 rounded-lg bg-slate-200 text-slate-700 dark:bg-zinc-700 dark:text-zinc-200 font-semibold transition-colors text-lg hover:bg-slate-300 dark:hover:bg-zinc-600 disabled:opacity-50"
                     title="Try Again"
+                    disabled={isListening}
                 >
                     <span className="material-symbols-outlined">refresh</span>
                 </button>
             </div>
             <div className="flex-1 px-4 text-center">
                 {isListening ? (
-                    <div className="text-slate-500 dark:text-zinc-400 animate-pulse">Listening...</div>
+                    <div className="flex items-center justify-center gap-6 text-slate-700 dark:text-zinc-300">
+                        <p className="text-lg font-medium">Correct: <span className="font-bold text-green-500">{correctCount}</span></p>
+                        <p className="text-lg font-medium">Incorrect: <span className="font-bold text-red-500">{incorrectCount}</span></p>
+                    </div>
                  ) : score !== null ? (
                     <div className="text-center">
-                        <p className="font-semibold text-lg">Score: {score.accuracy}%</p>
+                        <p className="font-bold text-2xl text-slate-800 dark:text-zinc-200">{score.accuracy}% Accuracy</p>
                         <p className="text-sm text-slate-500 dark:text-zinc-400">
                             <span className="text-green-600 dark:text-green-400">{score.correct} correct</span>
                             <span className="mx-2">·</span>

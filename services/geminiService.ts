@@ -1,5 +1,31 @@
 import { GoogleGenAI, Modality } from "@google/genai";
 
+function sanitizeAndPreparePrompt(
+    text: string, 
+    stylePrompt?: string,
+    pitch: number = 1.0,
+    speed: number = 1.0
+): string {
+    // Sanitize text for TTS, removing non-pronounced symbols.
+    let cleanText = text.replace(/[۞۩]/g, '').trim();
+    
+    // UNIVERSAL FIX for audio artifacts on long vowels (Madd).
+    // The pre-composed character 'آ' (ALEF WITH MADDA ABOVE) can cause a buzzing/vibrating sound.
+    // Replacing it with two standard Alefs 'اا' produces a more natural long vowel sound from the TTS model.
+    cleanText = cleanText.replace(/آ/g, 'اا');
+
+    const speedAndPitchInstruction = (speed !== 1.0 || pitch !== 1.0) 
+        ? `Say at ${speed}x speed and ${pitch}x pitch: ` 
+        : '';
+    
+    const finalPrompt = stylePrompt 
+        ? `${stylePrompt} ${speedAndPitchInstruction}`
+        : speedAndPitchInstruction;
+
+    return `${finalPrompt}${cleanText}`.trim();
+}
+
+
 export async function generateSpeech(
   text: string, 
   voiceName: 'Zephyr' | 'Kore' | 'Puck' | 'Charon' | 'Fenrir' = 'Zephyr',
@@ -17,26 +43,10 @@ export async function generateSpeech(
   const ai = new GoogleGenAI({ apiKey });
 
   try {
-    // Sanitize text for TTS, removing non-pronounced symbols.
-    let cleanText = text.replace(/[۞۩]/g, '').trim();
-    if (!cleanText) {
+    const finalText = sanitizeAndPreparePrompt(text, stylePrompt, pitch, speed);
+    if (!finalText) {
         throw new Error("Input text is empty after sanitization.");
     }
-    
-    // Universal fix for unnaturally long Madd (vowel stretching) artifacts.
-    // The pre-composed character 'آ' (ALEF WITH MADDA ABOVE) can cause a buzzing/vibrating sound.
-    // Replacing it with two standard Alefs 'اا' produces a more natural long vowel sound from the TTS model.
-    cleanText = cleanText.replace(/آ/g, 'اا');
-
-    const speedAndPitchInstruction = (speed !== 1.0 || pitch !== 1.0) 
-        ? `Say at ${speed}x speed and ${pitch}x pitch: ` 
-        : '';
-    
-    const finalPrompt = stylePrompt 
-        ? `${stylePrompt} ${speedAndPitchInstruction}`
-        : speedAndPitchInstruction;
-
-    const finalText = `${finalPrompt}${cleanText}`.trim();
       
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",

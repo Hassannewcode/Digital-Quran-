@@ -66,7 +66,8 @@ export const getWordStatuses = (
         for (let lookahead = 0; lookahead <= searchWindow && originalIdx + lookahead < normalizedOriginals.length; lookahead++) {
             const originalWord = normalizedOriginals[originalIdx + lookahead];
             const distance = levenshteinDistance(originalWord, spokenWord);
-            const threshold = originalWord.length > 3 ? 1 : 0;
+            // More lenient threshold: allows more mistakes for longer words
+            const threshold = Math.floor(originalWord.length / 3.5);
 
             if (distance <= threshold) {
                 // Mark skipped words as incorrect
