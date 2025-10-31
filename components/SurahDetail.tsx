@@ -13,7 +13,7 @@ interface SurahDetailProps {
   getNoteForAyah: (surahId: number, ayahId: number) => string;
   onToggleBookmark: (surahId: number, ayahId: number) => void;
   onSaveNote: (surahId: number, ayahId: number, text: string) => void;
-  onPlayRange: (surah: Surah, mode: 'verse-by-verse' | 'continuous' | 'full-surah' | 'asap-continuous') => void;
+  onPlayRange: (surah: Surah, mode: 'verse-by-verse' | 'full-surah') => void;
   onStartLearning: (surah: Surah, range: { start: number, end: number }, mode: LearningModeType) => void;
   notes: Note[];
   reciters: Reciter[];
@@ -31,7 +31,7 @@ interface SurahDetailProps {
   onRegenerateAyah: (surahId: number, ayahId: number) => void;
 }
 
-const AYAH_THRESHOLD_FOR_CONTINUOUS_PLAY = 54;
+const AYAH_THRESHOLD_FOR_CONTINUOUS_PLAY = 4500;
 
 const SurahDetail: React.FC<SurahDetailProps> = ({ 
     surah, 
@@ -59,11 +59,14 @@ const SurahDetail: React.FC<SurahDetailProps> = ({
     onIsInfiniteChange,
     onRegenerateAyah
 }) => {
-  const isLargeSurahForContinuous = surah.ayahs.length > AYAH_THRESHOLD_FOR_CONTINUOUS_PLAY;
   const surahNotes = notes
     .filter(note => note.surahId === surah.id)
     .sort((a, b) => a.ayahId - b.ayahId);
   const hasNotes = surahNotes.length > 0;
+
+  const ayahsInRange = surah.ayahs.slice(playbackRange.start - 1, playbackRange.end);
+  const charCountInRange = ayahsInRange.reduce((acc, ayah) => acc + ayah.text.length, 0);
+  const isLargeForContinuous = charCountInRange > AYAH_THRESHOLD_FOR_CONTINUOUS_PLAY;
 
   return (
     <>
@@ -103,13 +106,13 @@ const SurahDetail: React.FC<SurahDetailProps> = ({
           playingState={playingState}
           onPlayRange={onPlayRange}
           onStartLearning={(mode) => onStartLearning(surah, playbackRange, mode)}
-          isLargeForContinuous={isLargeSurahForContinuous}
           playbackRange={playbackRange}
           onPlaybackRangeChange={onPlaybackRangeChange}
           repeatCount={repeatCount}
           onRepeatCountChange={onRepeatCountChange}
           isInfinite={isInfinite}
           onIsInfiniteChange={onIsInfiniteChange}
+          isLargeForContinuous={isLargeForContinuous}
         />
         <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-md divide-y divide-slate-200 dark:divide-zinc-800">
           {surah.id !== 1 && surah.id !== 9 && (

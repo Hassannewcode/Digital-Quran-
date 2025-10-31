@@ -6,15 +6,15 @@ import { LearnIcon } from './icons/FeatureIcons';
 interface PlaybackControlsProps {
   surah: Surah;
   playingState: PlayingState;
-  onPlayRange: (surah: Surah, mode: 'verse-by-verse' | 'continuous' | 'full-surah' | 'asap-continuous') => void;
+  onPlayRange: (surah: Surah, mode: 'verse-by-verse' | 'full-surah') => void;
   onStartLearning: (mode: LearningModeType) => void;
-  isLargeForContinuous: boolean;
   playbackRange: { start: number; end: number };
   onPlaybackRangeChange: (range: { start: number; end: number }) => void;
   repeatCount: number;
   onRepeatCountChange: (count: number) => void;
   isInfinite: boolean;
   onIsInfiniteChange: (isInfinite: boolean) => void;
+  isLargeForContinuous: boolean;
 }
 
 const PlaybackControls: React.FC<PlaybackControlsProps> = ({ 
@@ -22,13 +22,13 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     playingState, 
     onPlayRange, 
     onStartLearning,
-    isLargeForContinuous,
     playbackRange,
     onPlaybackRangeChange,
     repeatCount,
     onRepeatCountChange,
     isInfinite,
     onIsInfiniteChange,
+    isLargeForContinuous,
  }) => {
 
   const [fromInput, setFromInput] = useState(playbackRange.start.toString());
@@ -47,12 +47,8 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   const isPlayingVerseByVerse = playingState.status !== 'idle' && playingState.mode === 'verse-by-verse' && playingState.surahId === surah.id;
   const isLoadingVerseByVerse = playingState.status === 'loading' && playingState.mode === 'verse-by-verse' && playingState.surahId === surah.id;
   
-  const isPlayingAsap = playingState.status !== 'idle' && playingState.mode === 'asap-continuous' && playingState.surahId === surah.id;
-  const isLoadingAsap = playingState.status === 'loading' && playingState.mode === 'asap-continuous' && playingState.surahId === surah.id;
-  
   const isPlayingFullSurah = playingState.status !== 'idle' && playingState.mode === 'full-surah' && playingState.surahId === surah.id;
   const isLoadingFullSurah = playingState.status === 'loading' && playingState.mode === 'full-surah' && playingState.surahId === surah.id;
-
 
   const handleFromBlur = () => {
     let num = parseInt(fromInput, 10);
@@ -87,7 +83,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     onIsInfiniteChange(e.target.checked);
   }
   
-  const anyLoading = isLoadingVerseByVerse || isLoadingFullSurah || isLoadingAsap;
+  const anyLoading = isLoadingVerseByVerse || isLoadingFullSurah;
 
   return (
     <div className="mb-6 p-4 bg-white dark:bg-zinc-900 rounded-lg shadow-sm border border-slate-200 dark:border-zinc-800">
@@ -109,20 +105,11 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
                     <span>{isPlayingVerseByVerse ? 'Stop' : 'Play (Verses)'}</span>
                 </button>
                 <button
-                    onClick={() => onPlayRange(surah, 'asap-continuous')}
-                    className="flex items-center justify-center w-full sm:w-auto gap-2 px-4 py-2 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 transition-colors disabled:bg-slate-400 dark:disabled:bg-zinc-700 disabled:cursor-not-allowed"
-                    aria-label={isPlayingAsap ? `Stop recitation` : `Play recitation non-stop, pre-loading verses`}
-                    disabled={anyLoading}
-                >
-                    {isLoadingAsap ? <LoadingSpinner/> : isPlayingAsap ? <StopIcon/> : <PlayIcon/>}
-                    <span>{isPlayingAsap ? 'Stop' : 'Play (NS-ASAP)'}</span>
-                </button>
-                <button
                     onClick={() => onPlayRange(surah, 'full-surah')}
-                    className="flex items-center justify-center w-full sm:w-auto gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-700 transition-colors disabled:bg-slate-400 dark:disabled:bg-zinc-700 disabled:cursor-not-allowed"
-                    aria-label={isPlayingFullSurah ? `Stop full recitation of Surah ${surah.name}` : `Play Surah ${surah.name} fully without pauses`}
+                    className="flex items-center justify-center w-full sm:w-auto gap-2 px-4 py-2 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 transition-colors disabled:bg-slate-400 dark:disabled:bg-zinc-700 disabled:cursor-not-allowed"
+                    aria-label={isPlayingFullSurah ? `Stop recitation` : `Play recitation non-stop`}
                     disabled={anyLoading || isLargeForContinuous}
-                    title={isLargeForContinuous ? "Full surah playback is disabled for long surahs to improve performance." : ""}
+                    title={isLargeForContinuous ? 'Range too long for non-stop playback. Please select fewer verses.' : 'Play selected range as one continuous audio file.'}
                 >
                     {isLoadingFullSurah ? <LoadingSpinner/> : isPlayingFullSurah ? <StopIcon/> : <PlayIcon/>}
                     <span>{isPlayingFullSurah ? 'Stop' : 'Play (Non-stop)'}</span>

@@ -28,7 +28,6 @@ const App: React.FC = () => {
   const [playingState, setPlayingState] = useState<PlayingState>({ status: 'idle' });
   const [toastMessage, setToastMessage] = useState<string>('');
   const [learningSession, setLearningSession] = useState<LearningSession | null>(null);
-  const [prefetchedBuffer, setPrefetchedBuffer] = useState<{ key: string; buffer: AudioBuffer } | null>(null);
 
   const [playbackRange, setPlaybackRange] = useState<{ start: number; end: number }>({ start: 1, end: 1 });
   const [repeatCount, setRepeatCount] = useState(0); // 0 = off
@@ -89,7 +88,6 @@ const App: React.FC = () => {
     if (playingState.status !== 'idle') {
       setPlayingState({ status: 'idle' });
     }
-    setPrefetchedBuffer(null);
   }, [playingState.status]);
 
   const handleRegenerateAyah = useCallback(async (surahId: number, ayahId: number) => {
@@ -106,39 +104,6 @@ const App: React.FC = () => {
     }
   }, [selectedReciterId]);
 
-  const prefetchAyah = useCallback(async (ayah: Ayah, surahId: number) => {
-    if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
-    }
-    const audioContext = audioContextRef.current;
-    if (audioContext.state === 'suspended') {
-        await audioContext.resume();
-    }
-
-    const reciter = RECITERS.find(r => r.id === selectedReciterId);
-    if (!reciter) return;
-    
-    const cacheKey = `${reciter.id}-${surahId}-${ayah.id}`;
-    
-    if (prefetchedBuffer?.key === cacheKey) return;
-
-    try {
-        let base64Audio = await getCachedAudio(cacheKey);
-        if (!base64Audio) {
-            base64Audio = await generateSpeech(ayah.text, reciter.voice, reciter.stylePrompt);
-            setCachedAudio(cacheKey, base64Audio).catch(console.error);
-        }
-        
-        const audioData = decode(base64Audio);
-        const audioBuffer = await decodeAudioData(audioData, audioContext, 24000, 1);
-        
-        setPrefetchedBuffer({ key: cacheKey, buffer: audioBuffer });
-    } catch (error) {
-        console.error(`Error prefetching audio for ayah ${surahId}:${ayah.id}:`, error);
-        setPrefetchedBuffer(null);
-    }
-  }, [selectedReciterId, prefetchedBuffer]);
-
   const handlePlayAyah = useCallback(async (ayah: Ayah, surahId: number, mode: PlayingMode, isContinuation = false) => {
     if (playingState.status !== 'idle' && !isContinuation) {
       stopPlayback();
@@ -148,35 +113,6 @@ const App: React.FC = () => {
         playCountRef.current = 1;
     }
     
-    // Pre-fetch next ayah immediately for 'asap-continuous' mode
-    if (mode === 'asap-continuous') {
-        const currentSurah = surahs.find(s => s.id === surahId);
-        if (currentSurah) {
-            let nextAyahToPrefetch: Ayah | undefined;
-            const isLastAyahInCurrentRange = ayah.id === playbackRange.end;
-    
-            if (isLastAyahInCurrentRange) {
-                 if (isInfinite || playCountRef.current < repeatCount + 1) {
-                    nextAyahToPrefetch = currentSurah.ayahs.find(a => a.id === playbackRange.start);
-                 }
-            } else {
-                const currentAyahIndex = currentSurah.ayahs.findIndex(a => a.id === ayah.id);
-                if (currentAyahIndex > -1 && currentAyahIndex < currentSurah.ayahs.length - 1) {
-                    const nextAyahInSequence = currentSurah.ayahs[currentAyahIndex + 1];
-                     if (nextAyahInSequence.id <= playbackRange.end) {
-                        nextAyahToPrefetch = nextAyahInSequence;
-                    }
-                }
-            }
-            
-            if (nextAyahToPrefetch) {
-                prefetchAyah(nextAyahToPrefetch, surahId); // Fire-and-forget
-            } else {
-                if (prefetchedBuffer) setPrefetchedBuffer(null);
-            }
-        }
-    }
-
     setPlayingState({ status: 'loading', surahId, ayahId: ayah.id, mode });
 
     try {
@@ -191,24 +127,21 @@ const App: React.FC = () => {
         const reciter = RECITERS.find(r => r.id === selectedReciterId);
         const voiceName = reciter?.voice || 'Zephyr';
         const stylePrompt = reciter?.stylePrompt;
-        const cacheKey = `${selectedReciterId}-${surahId}-${ayah.id}`;
         
-        let audioBuffer: AudioBuffer;
+        // For full-surah mode, the cache key includes the range
+        const cacheKey = mode === 'full-surah' 
+            ? `${selectedReciterId}-${surahId}-${playbackRange.start}-${playbackRange.end}`
+            : `${selectedReciterId}-${surahId}-${ayah.id}`;
+        
+        let base64Audio = await getCachedAudio(cacheKey);
 
-        if (mode === 'asap-continuous' && prefetchedBuffer?.key === cacheKey) {
-            audioBuffer = prefetchedBuffer.buffer;
-            setPrefetchedBuffer(null); // Consume the buffer
-        } else {
-            let base64Audio = await getCachedAudio(cacheKey);
-
-            if (!base64Audio) {
-                base64Audio = await generateSpeech(ayah.text, voiceName, stylePrompt);
-                setCachedAudio(cacheKey, base64Audio).catch(console.error);
-            }
-            
-            const audioData = decode(base64Audio);
-            audioBuffer = await decodeAudioData(audioData, audioContext, 24000, 1);
+        if (!base64Audio) {
+            base64Audio = await generateSpeech(ayah.text, voiceName, stylePrompt);
+            setCachedAudio(cacheKey, base64Audio).catch(console.error);
         }
+        
+        const audioData = decode(base64Audio);
+        const audioBuffer = await decodeAudioData(audioData, audioContext, 24000, 1);
         
         const source = audioContext.createBufferSource();
         source.buffer = audioBuffer;
@@ -222,41 +155,37 @@ const App: React.FC = () => {
             if (audioSourceRef.current !== source) return;
             audioSourceRef.current = null;
             
-            const isRangePlayback = mode === 'verse-by-verse' || mode === 'continuous' || mode === 'asap-continuous';
+            const currentSurah = surahs.find(s => s.id === surahId);
+            if (!currentSurah) { stopPlayback(); return; }
 
-            if (isRangePlayback) {
-                const currentSurah = surahs.find(s => s.id === surahId);
-                if (!currentSurah) { stopPlayback(); return; }
-                
-                const isLastAyahInRange = ayah.id === playbackRange.end;
-
-                if (isLastAyahInRange) {
-                    if (isInfinite || playCountRef.current < repeatCount + 1) {
-                        playCountRef.current += 1;
-                        const firstAyah = currentSurah.ayahs.find(a => a.id === playbackRange.start);
-                        if (firstAyah) {
-                             const delay = mode === 'continuous' ? 50 : (mode === 'verse-by-verse' ? 500 : 0);
-                             playNextTimeoutRef.current = window.setTimeout(() => {
-                                handlePlayAyah(firstAyah, surahId, mode, true);
-                            }, delay);
-                        } else {
-                            stopPlayback();
-                        }
-                    } else {
+            if (mode === 'verse-by-verse' || mode === 'full-surah') {
+                 const isLastAyahInRange = ayah.id === playbackRange.end;
+                 const shouldLoop = isInfinite || playCountRef.current < repeatCount + 1;
+                 
+                 if (shouldLoop && (mode === 'full-surah' || isLastAyahInRange)) {
+                     playCountRef.current += 1;
+                     const firstAyah = currentSurah.ayahs.find(a => a.id === playbackRange.start);
+                     if (firstAyah) {
+                        const delay = mode === 'verse-by-verse' ? 500 : 250;
+                        playNextTimeoutRef.current = window.setTimeout(() => {
+                           handlePlayRange(currentSurah, mode, true);
+                        }, delay);
+                     } else {
                         stopPlayback();
-                    }
-                } else {
+                     }
+                 } else if (mode === 'verse-by-verse' && !isLastAyahInRange) {
                     const currentAyahIndex = currentSurah.ayahs.findIndex(a => a.id === ayah.id);
                     if (currentAyahIndex > -1 && currentAyahIndex < currentSurah.ayahs.length - 1) {
                         const nextAyah = currentSurah.ayahs[currentAyahIndex + 1];
-                        const delay = mode === 'continuous' ? 50 : (mode === 'verse-by-verse' ? 500 : 0);
                         playNextTimeoutRef.current = window.setTimeout(() => {
                             handlePlayAyah(nextAyah, surahId, mode, true);
-                        }, delay);
+                        }, 500);
                     } else {
                         stopPlayback();
                     }
-                }
+                 } else {
+                     stopPlayback();
+                 }
             } else { // Single Ayah Mode
                  if (isInfinite || playCountRef.current < repeatCount + 1) {
                      playCountRef.current += 1;
@@ -278,94 +207,34 @@ const App: React.FC = () => {
       setToastMessage(message);
       setPlayingState({ status: 'error', surahId, ayahId: ayah.id, mode });
     }
-  }, [playingState.status, stopPlayback, selectedReciterId, surahs, playbackRange, repeatCount, isInfinite, prefetchedBuffer, prefetchAyah]);
-  
-  const handlePlayFullSurah = useCallback(async (surah: Surah) => {
-    const isPlayingThisMode = playingState.status !== 'idle' && playingState.mode === 'full-surah' && playingState.surahId === surah.id;
-    if (isPlayingThisMode) {
-        stopPlayback();
-        return;
-    }
-    
-    stopPlayback(); // stop any other playback before starting
+  }, [playingState.status, stopPlayback, selectedReciterId, surahs, playbackRange, repeatCount, isInfinite]);
 
-    setPlayingState({ status: 'loading', surahId: surah.id, ayahId: playbackRange.start, mode: 'full-surah' });
-
-    try {
-        if (!audioContextRef.current) {
-            audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
-        }
-        const audioContext = audioContextRef.current;
-        if (audioContext.state === 'suspended') {
-            await audioContext.resume();
-        }
-
-        const ayahsInRange = surah.ayahs.slice(playbackRange.start - 1, playbackRange.end);
-        let fullText = ayahsInRange.map(a => a.text).join(' ');
-
-        if (surah.id !== 1 && surah.id !== 9 && playbackRange.start === 1) {
-            fullText = "بِسْمِ اللَّهِ الرَّحْمَـٰنِ الرَّحِيمِ " + fullText;
-        }
-
-        const reciter = RECITERS.find(r => r.id === selectedReciterId);
-        if (!reciter) throw new Error("Reciter not found");
-        
-        const voiceName = reciter.voice;
-        const stylePrompt = reciter.stylePrompt;
-        
-        const cacheKey = `${reciter.id}-${surah.id}-${playbackRange.start}-${playbackRange.end}-full`;
-        
-        let base64Audio = await getCachedAudio(cacheKey);
-
-        if (!base64Audio) {
-            base64Audio = await generateSpeech(fullText, voiceName, stylePrompt);
-            await setCachedAudio(cacheKey, base64Audio);
-        }
-        
-        const audioData = decode(base64Audio);
-        const audioBuffer = await decodeAudioData(audioData, audioContext, 24000, 1);
-
-        const source = audioContext.createBufferSource();
-        source.buffer = audioBuffer;
-        source.connect(audioContext.destination);
-        source.start();
-        
-        audioSourceRef.current = source;
-        setPlayingState({ status: 'playing', surahId: surah.id, ayahId: playbackRange.start, mode: 'full-surah' });
-
-        source.onended = () => {
-            if (audioSourceRef.current !== source) return;
-            stopPlayback();
-        };
-
-    } catch (error) {
-      console.error("Error playing full surah audio:", error);
-      let message = "Audio generation for the full range failed. Please try a shorter range.";
-      if (error instanceof Error && error.message.includes("No audio data returned")) {
-          message = "Audio generation failed. The voice may be busy or unavailable.";
-      }
-      setToastMessage(message);
-      setPlayingState({ status: 'error', surahId: surah.id, ayahId: playbackRange.start, mode: 'full-surah' });
-    }
-}, [playingState.status, stopPlayback, selectedReciterId, playbackRange]);
-
-
-  const handlePlayRange = useCallback((surah: Surah, mode: 'verse-by-verse' | 'continuous' | 'full-surah' | 'asap-continuous') => {
-    if(mode === 'full-surah'){
-        handlePlayFullSurah(surah);
-        return;
-    }
+  const handlePlayRange = useCallback((surah: Surah, mode: 'verse-by-verse' | 'full-surah', isContinuation = false) => {
     const isPlayingThisMode = playingState.status !== 'idle' && playingState.mode === mode && playingState.surahId === surah.id;
 
-    if(isPlayingThisMode) {
+    if(isPlayingThisMode && !isContinuation) {
         stopPlayback();
-    } else {
+        return;
+    } 
+
+    if (!isContinuation) {
+        stopPlayback();
+    }
+    
+    if (mode === 'full-surah') {
+        const ayahsInRange = surah.ayahs.filter(a => a.id >= playbackRange.start && a.id <= playbackRange.end);
+        const combinedText = ayahsInRange.map(a => a.text).join(' ');
+        
+        const fakeAyah: Ayah = { id: playbackRange.start, text: combinedText };
+        handlePlayAyah(fakeAyah, surah.id, 'full-surah', isContinuation);
+
+    } else { // verse-by-verse
         const firstAyahInRange = surah.ayahs.find(a => a.id === playbackRange.start);
         if (firstAyahInRange) {
-            handlePlayAyah(firstAyahInRange, surah.id, mode);
+            handlePlayAyah(firstAyahInRange, surah.id, mode, isContinuation);
         }
     }
-  }, [playingState, stopPlayback, handlePlayAyah, playbackRange.start, handlePlayFullSurah]);
+  }, [playingState, stopPlayback, handlePlayAyah, playbackRange.start, playbackRange.end]);
 
   const handleSelectSurah = (surah: Surah) => {
     stopPlayback();

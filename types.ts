@@ -12,7 +12,7 @@ export interface Surah {
 }
 
 export type PlayingStatus = 'idle' | 'loading' | 'playing' | 'error';
-export type PlayingMode = 'single' | 'verse-by-verse' | 'continuous' | 'full-surah' | 'asap-continuous';
+export type PlayingMode = 'single' | 'verse-by-verse' | 'full-surah';
 export type LearningModeType = 'none' | 'highlight' | 'memory';
 
 export type PlayingState = {

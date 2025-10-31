@@ -1,7 +1,13 @@
 import { GoogleGenAI, Modality } from "@google/genai";
 
-// Initialize with a default key, assuming it's set in the environment.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+const apiKey = process.env.API_KEY;
+
+if (!apiKey) {
+  // This provides a clear error if the API key isn't configured in the deployment environment.
+  throw new Error("API_KEY environment variable is not set. Please ensure it is configured in your deployment environment.");
+}
+
+const ai = new GoogleGenAI({ apiKey });
 
 export async function generateSpeech(
   text: string, 
