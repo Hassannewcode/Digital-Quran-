@@ -59,8 +59,9 @@ const Player: React.FC<PlayerProps> = ({
     const progress = totalTime > 0 ? (elapsedTime / totalTime) * 100 : 0;
     const currentSliderValue = isSeeking.current ? seekValue : elapsedTime;
 
-    // A single audio buffer is only available for seeking in non-chunked full-surah mode.
-    const isSeekable = mode === 'full-surah' && totalTime > 0 && surah.ayahs.filter(a => a.id >= modalProps.playbackRange.start && a.id <= modalProps.playbackRange.end).length <= 36;
+    const totalVersesInRange = modalProps.playbackRange.end - modalProps.playbackRange.start + 1;
+    const isChunkedPlayback = mode === 'full-surah' && totalVersesInRange > 36;
+    const isSeekable = mode === 'full-surah' && !isChunkedPlayback;
 
 
     const getSubtitle = () => {
@@ -68,7 +69,7 @@ const Player: React.FC<PlayerProps> = ({
             return "Generating audio...";
         }
         if (mode === 'full-surah') {
-            return 'Continuous Recitation';
+            return isChunkedPlayback ? `Continuous Recitation (Chunk ${ayah.id}-${Math.min(ayah.id + 30, modalProps.playbackRange.end)})` : 'Continuous Recitation';
         }
         return ayah.translation;
     };
