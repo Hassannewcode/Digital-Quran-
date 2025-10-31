@@ -51,12 +51,13 @@ const App: React.FC = () => {
   const selectedTranslation = useMemo(() => TRANSLATIONS.find(t => t.id === selectedTranslationId), [selectedTranslationId]);
 
   useEffect(() => {
+    // This effect runs once on mount to set the initial theme from the state loaded via useLocalStorage
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
-  }, [theme]);
+  }, []); // Empty dependency array ensures this runs only once
 
   useEffect(() => {
     setSurahs(getSurahsWithTranslation(selectedTranslation?.data || null));
@@ -375,7 +376,15 @@ const App: React.FC = () => {
   };
   
   const handleThemeToggle = () => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+    setTheme(prev => {
+        const newTheme = prev === 'light' ? 'dark' : 'light';
+        if (newTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        return newTheme;
+    });
   };
 
   const handleNavigate = (newView: View) => {

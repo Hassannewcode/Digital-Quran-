@@ -20,6 +20,11 @@
       }
       .font-amiri-quran {
         font-family: 'Amiri Quran', serif;
+        /* Enable OpenType features for better Arabic ligatures and rendering of Quranic text */
+        font-variant-ligatures: common-ligatures contextual;
+        -webkit-font-feature-settings: "calt" on, "liga" on;
+        font-feature-settings: "calt" on, "liga" on;
+        text-rendering: optimizeLegibility;
       }
       .material-symbols-outlined {
         font-variation-settings:

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 
 // Bodge: The type definitions for SpeechRecognition are not always present in all TS environments.
@@ -17,6 +18,8 @@ interface SpeechRecognitionEvent {
         readonly [key: number]: {
             readonly transcript: string;
         };
+        // Fix: Added readonly length property to correctly type SpeechRecognitionResult, which is array-like and was causing a compile error on line 60.
+        readonly length: number;
     }[];
 }
 
@@ -56,20 +59,10 @@ export const useSpeechRecognition = () => {
     recognition.lang = 'ar-SA';
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
-      let interimTranscript = '';
-      let finalTranscript = '';
-
-      for (let i = 0; i < event.results.length; ++i) {
-        const result = event.results[i];
-        if (result && result[0]) {
-            if (result.isFinal) {
-                finalTranscript += result[0].transcript + ' ';
-            } else {
-                interimTranscript += result[0].transcript;
-            }
-        }
-      }
-      setTranscript(finalTranscript + interimTranscript);
+       const newTranscript = Array.from(event.results)
+        .map(result => result?.[0]?.transcript ?? '')
+        .join('');
+      setTranscript(newTranscript);
     };
 
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {

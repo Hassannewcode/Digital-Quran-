@@ -106,6 +106,7 @@ const AyahView: React.FC<AyahViewProps> = ({ ayah, surah, onPlay, onStop, onStar
             <div className="flex-1">
                 <p dir="rtl" className="text-3xl md:text-4xl leading-loose font-amiri-quran text-right text-slate-900 dark:text-zinc-100 mb-4">
                     {ayah.text}
+                     <span className="text-2xl font-amiri-quran select-none text-blue-500 dark:text-blue-400 mx-2">﴿{ayah.id.toLocaleString('ar')}﴾</span>
                 </p>
                 {ayah.translation && (
                     <p dir="ltr" className="text-slate-600 dark:text-zinc-400 text-left leading-relaxed">

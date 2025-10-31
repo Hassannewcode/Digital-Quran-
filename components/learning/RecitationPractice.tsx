@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 import { getWordStatuses, getFullTextAndWordMap, WordStatus } from '../../utils/textComparison';
 import { MicrophoneIcon } from '../icons/FeatureIcons';
@@ -13,8 +13,15 @@ interface RecitationPracticeProps {
   onClose: () => void;
 }
 
-const Word: React.FC<{ word: string, status: WordStatus, mode: LearningModeType, isVisible: boolean }> = ({ word, status, mode, isVisible }) => {
-    if (mode === 'memory' && !isVisible) {
+const Word: React.FC<{ word: string, status: WordStatus, mode: LearningModeType }> = ({ word, status, mode }) => {
+    let isHidden = mode === 'memory' && (status === 'pending' || status === 'current');
+    
+    // In memory mode, if a word is incorrect, reveal it for feedback.
+    if (mode === 'memory' && status === 'incorrect') {
+        isHidden = false;
+    }
+
+    if (isHidden) {
         // Render a placeholder that has the same width as the word to avoid layout shifts.
         return <span className="word-hidden mx-1 px-1 py-0.5" dangerouslySetInnerHTML={{ __html: word.replace(/./g, '&nbsp;') }}></span>;
     }
@@ -36,13 +43,16 @@ const RecitationPractice: React.FC<RecitationPracticeProps> = ({ session, onClos
     hasRecognitionSupport,
   } = useSpeechRecognition();
   
+  const [score, setScore] = useState<{ correct: number, incorrect: number, accuracy: number } | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const { originalWords } = useMemo(() => getFullTextAndWordMap(surah, range), [surah, range]);
+  const { originalWords, wordMap } = useMemo(() => getFullTextAndWordMap(surah, range), [surah, range]);
 
-  const { wordStatuses, currentWordIndex } = useMemo(() => {
+  const { statuses: wordStatuses, currentWordIndex, correctCount, incorrectCount } = useMemo(() => {
     return getWordStatuses(originalWords, transcript);
   }, [originalWords, transcript]);
+  
+  const currentAyahId = (currentWordIndex < wordMap.length) ? wordMap[currentWordIndex].ayahId : null;
 
   useEffect(() => {
     const wordEl = contentRef.current?.querySelector(`[data-word-index='${currentWordIndex}']`);
@@ -50,20 +60,33 @@ const RecitationPractice: React.FC<RecitationPracticeProps> = ({ session, onClos
         wordEl.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
     }
   }, [currentWordIndex]);
+  
+  useEffect(() => {
+    if (!isListening && transcript.length > 0) {
+      const totalWordsAttempted = correctCount + incorrectCount;
+      if (totalWordsAttempted > 0) {
+        setScore({
+          correct: correctCount,
+          incorrect: incorrectCount,
+          accuracy: Math.round((correctCount / totalWordsAttempted) * 100)
+        });
+      }
+    }
+  }, [isListening, transcript, correctCount, incorrectCount]);
 
   const handleToggleListening = () => {
     if (isListening) {
       stopListening();
     } else {
+      setScore(null);
       startListening();
     }
   };
   
-  const handleReset = () => {
+  const handleTryAgain = () => {
       stopListening();
-      // This will trigger a re-render with fresh statuses because the transcript becomes ''
-      // which the useSpeechRecognition hook handles upon starting again.
-      startListening(); 
+      setScore(null);
+      setTimeout(() => startListening(), 100);
   }
 
   if (!hasRecognitionSupport) {
@@ -96,8 +119,10 @@ const RecitationPractice: React.FC<RecitationPracticeProps> = ({ session, onClos
 
       <main ref={contentRef} className="flex-1 overflow-y-auto py-8">
         <div dir="rtl" className="text-3xl md:text-4xl lg:text-5xl leading-loose font-amiri-quran text-right max-w-4xl mx-auto">
-          {ayahsInRange.map(ayah => (
-              <div key={ayah.id} className="mb-4">
+          {ayahsInRange.map(ayah => {
+            const isCurrentAyah = ayah.id === currentAyahId;
+            return (
+              <div key={ayah.id} className={`mb-4 p-2 transition-colors duration-300 rounded-lg ${isCurrentAyah ? 'bg-blue-50 dark:bg-zinc-800/50' : ''}`}>
                   {ayah.text.split(/\s+/).filter(Boolean).map((word, wordIdx) => {
                       const globalIndex = wordCounter;
                       wordCounter++;
@@ -107,20 +132,19 @@ const RecitationPractice: React.FC<RecitationPracticeProps> = ({ session, onClos
                                 word={word} 
                                 status={wordStatuses[globalIndex]} 
                                 mode={mode}
-                                isVisible={mode === 'highlight' || globalIndex <= currentWordIndex}
                               />
                           </span>
                       )
                   })}
-                   <span className="text-xl font-sans select-none text-blue-500 dark:text-blue-400 mr-2">﴿{ayah.id}﴾</span>
+                   <span className="text-xl font-amiri-quran select-none text-blue-500 dark:text-blue-400 mr-2">﴿{ayah.id.toLocaleString('ar')}﴾</span>
               </div>
-          ))}
+          )})}
         </div>
       </main>
 
       <footer className="flex-shrink-0 pt-4 border-t border-slate-300 dark:border-zinc-700">
          <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
-            <div className="flex gap-2">
+            <div className="flex gap-2" style={{minWidth: '150px'}}>
                 <button
                     onClick={handleToggleListening}
                     className={`flex items-center gap-2 px-6 py-3 rounded-lg text-white font-semibold transition-colors text-lg ${
@@ -128,23 +152,33 @@ const RecitationPractice: React.FC<RecitationPracticeProps> = ({ session, onClos
                     }`}
                     >
                     <MicrophoneIcon />
-                    <span>{isListening ? 'Stop' : 'Start'}</span>
+                    <span>{isListening ? 'Stop' : 'Recite'}</span>
                 </button>
                  <button
-                    onClick={handleReset}
+                    onClick={handleTryAgain}
                     className="flex items-center gap-2 px-4 py-3 rounded-lg bg-slate-200 text-slate-700 dark:bg-zinc-700 dark:text-zinc-200 font-semibold transition-colors text-lg hover:bg-slate-300 dark:hover:bg-zinc-600"
-                    title="Restart Practice"
+                    title="Try Again"
                 >
                     <span className="material-symbols-outlined">refresh</span>
                 </button>
             </div>
-            <div className="flex-1 px-6 text-right">
+            <div className="flex-1 px-4 text-center">
                 {isListening ? (
                     <div className="text-slate-500 dark:text-zinc-400 animate-pulse">Listening...</div>
+                 ) : score !== null ? (
+                    <div className="text-center">
+                        <p className="font-semibold text-lg">Score: {score.accuracy}%</p>
+                        <p className="text-sm text-slate-500 dark:text-zinc-400">
+                            <span className="text-green-600 dark:text-green-400">{score.correct} correct</span>
+                            <span className="mx-2">·</span>
+                            <span className="text-red-600 dark:text-red-400">{score.incorrect} incorrect</span>
+                        </p>
+                    </div>
                 ) : (
-                    <p dir="rtl" className="text-slate-600 dark:text-zinc-400 font-arabic truncate" title={transcript}>{transcript || "Press 'Start' to begin reciting."}</p>
+                    <p dir="rtl" className="text-slate-600 dark:text-zinc-400 font-arabic truncate" title={transcript}>{transcript || "Press 'Recite' to begin."}</p>
                 )}
             </div>
+            <div style={{minWidth: '150px'}}></div>
          </div>
       </footer>
     </div>

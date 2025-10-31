@@ -44,45 +44,60 @@ const levenshteinDistance = (a: string, b: string): number => {
 export const getWordStatuses = (
   originalWords: string[], 
   spokenText: string
-): { statuses: WordStatus[], currentWordIndex: number } => {
-    const spokenWords = spokenText.split(/\s+/).filter(w => w.length > 0);
+): { statuses: WordStatus[], currentWordIndex: number, correctCount: number, incorrectCount: number } => {
+    const spokenWords = spokenText.trim().split(/\s+/).filter(w => w.length > 0);
   
     const normalizedOriginals = originalWords.map(normalizeArabic);
     const normalizedSpokens = spokenWords.map(normalizeArabic);
 
     const statuses: WordStatus[] = Array(originalWords.length).fill('pending');
-    let lastCorrectIndex = -1;
-    let stopProcessing = false;
+    let correctCount = 0;
+    let incorrectCount = 0;
+    
+    let originalIdx = 0;
+    for (let spokenIdx = 0; spokenIdx < normalizedSpokens.length; spokenIdx++) {
+        if (originalIdx >= normalizedOriginals.length) break;
 
-    for (let i = 0; i < normalizedOriginals.length; i++) {
-        if (i >= spokenWords.length || stopProcessing) {
-            break;
+        const spokenWord = normalizedSpokens[spokenIdx];
+        let foundMatch = false;
+        
+        const searchWindow = 2; // How many words to look ahead for a match
+
+        for (let lookahead = 0; lookahead <= searchWindow && originalIdx + lookahead < normalizedOriginals.length; lookahead++) {
+            const originalWord = normalizedOriginals[originalIdx + lookahead];
+            const distance = levenshteinDistance(originalWord, spokenWord);
+            const threshold = originalWord.length > 3 ? 1 : 0;
+
+            if (distance <= threshold) {
+                // Mark skipped words as incorrect
+                for (let i = 0; i < lookahead; i++) {
+                    if (statuses[originalIdx + i] === 'pending') {
+                        statuses[originalIdx + i] = 'incorrect';
+                        incorrectCount++;
+                    }
+                }
+                statuses[originalIdx + lookahead] = 'correct';
+                correctCount++;
+                originalIdx += lookahead + 1;
+                foundMatch = true;
+                break;
+            }
         }
 
-        const originalWord = normalizedOriginals[i];
-        const spokenWord = normalizedSpokens[i];
-        const distance = levenshteinDistance(originalWord, spokenWord);
-        
-        // Balanced threshold: allow 1 mistake for words of 4+ chars.
-        const threshold = originalWord.length >= 4 ? 1 : 0; 
-        
-        if (distance <= threshold) {
-            statuses[i] = 'correct';
-            lastCorrectIndex = i;
-        } else {
-            statuses[i] = 'incorrect';
-            stopProcessing = true;
+        if (!foundMatch) {
+            // No match in window, assume current word is incorrect and move on
+            statuses[originalIdx] = 'incorrect';
+            incorrectCount++;
+            originalIdx++;
         }
     }
     
-    const currentWordIndex = lastCorrectIndex + 1;
+    const currentWordIndex = originalIdx;
     if (currentWordIndex < originalWords.length) {
-        if (statuses[currentWordIndex] === 'pending') {
-            statuses[currentWordIndex] = 'current';
-        }
+        statuses[currentWordIndex] = 'current';
     }
 
-    return { statuses, currentWordIndex };
+    return { statuses, currentWordIndex, correctCount, incorrectCount };
 };
 
 export const getFullTextAndWordMap = (surah: Surah, range: {start: number, end: number}) => {
