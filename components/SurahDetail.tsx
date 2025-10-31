@@ -29,6 +29,10 @@ interface SurahDetailProps {
   isInfinite: boolean;
   onIsInfiniteChange: (isInfinite: boolean) => void;
   onRegenerateAyah: (surahId: number, ayahId: number) => void;
+  pitch: number;
+  onPitchChange: (pitch: number) => void;
+  speed: number;
+  onSpeedChange: (speed: number) => void;
 }
 
 const SurahDetail: React.FC<SurahDetailProps> = ({ 
@@ -56,6 +60,10 @@ const SurahDetail: React.FC<SurahDetailProps> = ({
     isInfinite,
     onIsInfiniteChange,
     onRegenerateAyah,
+    pitch,
+    onPitchChange,
+    speed,
+    onSpeedChange,
 }) => {
   const surahNotes = notes
     .filter(note => note.surahId === surah.id)
@@ -71,6 +79,10 @@ const SurahDetail: React.FC<SurahDetailProps> = ({
         selectedTranslationId={selectedTranslationId}
         onReciterChange={onReciterChange}
         onTranslationChange={onTranslationChange}
+        pitch={pitch}
+        onPitchChange={onPitchChange}
+        speed={speed}
+        onSpeedChange={onSpeedChange}
     />
     {selectedTranslationId === 'none' && (
         <div className="my-6 p-4 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 rounded-r-lg text-blue-700 dark:text-blue-300">

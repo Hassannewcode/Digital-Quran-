@@ -3,7 +3,9 @@ import { GoogleGenAI, Modality } from "@google/genai";
 export async function generateSpeech(
   text: string, 
   voiceName: 'Zephyr' | 'Kore' | 'Puck' | 'Charon' | 'Fenrir' = 'Zephyr',
-  stylePrompt?: string
+  stylePrompt?: string,
+  pitch: number = 1.0,
+  speed: number = 1.0,
 ): Promise<string> {
   const apiKey = process.env.API_KEY;
 
@@ -16,12 +18,25 @@ export async function generateSpeech(
 
   try {
     // Sanitize text for TTS, removing non-pronounced symbols.
-    const cleanText = text.replace(/[۞۩]/g, '').trim();
+    let cleanText = text.replace(/[۞۩]/g, '').trim();
     if (!cleanText) {
         throw new Error("Input text is empty after sanitization.");
     }
+    
+    // Universal fix for unnaturally long Madd (vowel stretching) artifacts.
+    // The pre-composed character 'آ' (ALEF WITH MADDA ABOVE) can cause a buzzing/vibrating sound.
+    // Replacing it with two standard Alefs 'اا' produces a more natural long vowel sound from the TTS model.
+    cleanText = cleanText.replace(/آ/g, 'اا');
 
-    const finalText = stylePrompt ? `${stylePrompt}${cleanText}` : cleanText;
+    const speedAndPitchInstruction = (speed !== 1.0 || pitch !== 1.0) 
+        ? `Say at ${speed}x speed and ${pitch}x pitch: ` 
+        : '';
+    
+    const finalPrompt = stylePrompt 
+        ? `${stylePrompt} ${speedAndPitchInstruction}`
+        : speedAndPitchInstruction;
+
+    const finalText = `${finalPrompt}${cleanText}`.trim();
       
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",

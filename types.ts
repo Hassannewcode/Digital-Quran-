@@ -32,6 +32,8 @@ export interface Reciter {
     name: string;
     voice: 'Zephyr' | 'Kore' | 'Puck' | 'Charon' | 'Fenrir';
     stylePrompt?: string;
+    defaultPitch?: number;
+    defaultSpeed?: number;
 }
 
 export interface Translation {

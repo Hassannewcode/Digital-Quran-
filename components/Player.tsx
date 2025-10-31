@@ -1,4 +1,5 @@
 
+
 import React, { useState, ChangeEvent } from 'react';
 // Fix: Import `PlayingMode` type to resolve TypeScript error.
 import { Ayah, PlayingState, Surah, PlayingMode } from '../types';
@@ -6,7 +7,7 @@ import { PlayIcon, StopIcon, LoadingSpinner, PreviousIcon, NextIcon, CloseIcon }
 import PlaybackSettingsModal from './PlaybackSettingsModal';
 
 interface PlayerProps {
-    playingState: PlayingState;
+    playingState: Exclude<PlayingState, { status: 'idle' }>;
     surah: Surah;
     ayah: Ayah;
     elapsedTime: number;
@@ -39,7 +40,9 @@ const Player: React.FC<PlayerProps> = ({
     onClose, onPlayPause, onNext, onPrevious, onSeek, volume, onVolumeChange,
     ...modalProps
 }) => {
-    const { status, mode } = playingState as { status: Exclude<PlayingState['status'], 'idle'>, mode: PlayingMode };
+    // Fix: Removed unnecessary type assertion. The component is only rendered when `playingState` is not 'idle',
+    // so TypeScript can correctly infer the type and its properties like `mode`.
+    const { status, mode } = playingState;
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const isSeeking = React.useRef(false);
     const [seekValue, setSeekValue] = useState(0);
@@ -63,6 +66,16 @@ const Player: React.FC<PlayerProps> = ({
 
     const isFullSurahMode = mode === 'full-surah';
 
+    const getSubtitle = () => {
+        if (status === 'loading') {
+            return "Generating audio...";
+        }
+        if (isFullSurahMode) {
+            return 'Continuous Recitation';
+        }
+        return ayah.translation;
+    };
+
     return (
         <>
             <div className="fixed bottom-0 left-0 right-0 z-50 bg-slate-800/95 dark:bg-zinc-900/95 backdrop-blur-sm text-white shadow-lg-top">
@@ -81,13 +94,13 @@ const Player: React.FC<PlayerProps> = ({
                             className="w-full h-1.5 bg-slate-600 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-md"
                             style={{ backgroundSize: `${isFullSurahMode ? progress : 0}% 100%` }}
                         />
-                        <span className="text-xs w-10 text-center">{formatTime(totalTime)}</span>
+                        <span className="text-xs w-10 text-center">{status === 'loading' ? '--:--' : formatTime(totalTime)}</span>
                     </div>
 
                     <div className="flex items-center justify-between mt-1">
                         <div className="w-1/4">
-                            <p className="font-bold truncate text-sm">{surah.name} ({playingState.status !== 'idle' && playingState.ayahId})</p>
-                            <p className="text-xs text-slate-300 truncate">{isFullSurahMode ? 'Continuous Recitation' : ayah.translation}</p>
+                            <p className="font-bold truncate text-sm">{surah.name} ({playingState.ayahId})</p>
+                            <p className="text-xs text-slate-300 truncate">{getSubtitle()}</p>
                         </div>
                         
                         <div className="flex items-center gap-3">
@@ -97,7 +110,11 @@ const Player: React.FC<PlayerProps> = ({
                             <button onClick={onPrevious} disabled={isFullSurahMode} className="p-2 text-slate-300 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                                 <PreviousIcon />
                             </button>
-                            <button onClick={onPlayPause} className="w-12 h-12 flex items-center justify-center rounded-full bg-white text-slate-800 hover:bg-slate-200 transition-colors">
+                            <button 
+                                onClick={status === 'loading' ? onClose : onPlayPause} 
+                                className="w-12 h-12 flex items-center justify-center rounded-full bg-white text-slate-800 hover:bg-slate-200 transition-colors"
+                                aria-label={status === 'loading' ? 'Stop loading' : (status === 'playing' ? 'Pause' : 'Play')}
+                            >
                                 {status === 'loading' ? <LoadingSpinner /> : status === 'playing' ? <StopIcon /> : <PlayIcon />}
                             </button>
                             <button onClick={onNext} disabled={isFullSurahMode} className="p-2 text-slate-300 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed">

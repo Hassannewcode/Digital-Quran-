@@ -1,3 +1,4 @@
+
 import React from 'react';
 import SettingsPanel from './SettingsPanel';
 import { Reciter, Translation } from '../types';

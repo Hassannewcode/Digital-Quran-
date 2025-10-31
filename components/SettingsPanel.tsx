@@ -8,6 +8,10 @@ interface SettingsPanelProps {
     selectedTranslationId: string;
     onReciterChange: (id: string) => void;
     onTranslationChange: (id: string) => void;
+    pitch: number;
+    onPitchChange: (pitch: number) => void;
+    speed: number;
+    onSpeedChange: (speed: number) => void;
 }
 
 const SettingsPanel: React.FC<SettingsPanelProps> = ({ 
@@ -16,10 +20,14 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
     selectedReciterId, 
     selectedTranslationId, 
     onReciterChange, 
-    onTranslationChange 
+    onTranslationChange,
+    pitch,
+    onPitchChange,
+    speed,
+    onSpeedChange,
 }) => {
     return (
-        <div className="mb-6 p-4 bg-white dark:bg-zinc-900 rounded-lg shadow-sm border border-slate-200 dark:border-zinc-800 flex flex-col sm:flex-row items-center gap-4 justify-center">
+        <div className="mb-6 p-4 bg-white dark:bg-zinc-900 rounded-lg shadow-sm border border-slate-200 dark:border-zinc-800 flex flex-wrap items-center gap-x-6 gap-y-4 justify-center">
             <div className="flex items-center gap-2 w-full sm:w-auto">
                 <label htmlFor="reciter-select" className="text-sm font-medium text-slate-600 dark:text-zinc-300">Reciter:</label>
                 <select 
@@ -45,6 +53,30 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                         <option key={translation.id} value={translation.id}>{translation.name}</option>
                     ))}
                 </select>
+            </div>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+                <label htmlFor="speed-control" className="text-sm font-medium text-slate-600 dark:text-zinc-300">Speed:</label>
+                <input 
+                    id="speed-control"
+                    type="range"
+                    min="0.5" max="2" step="0.05"
+                    value={speed}
+                    onChange={(e) => onSpeedChange(parseFloat(e.target.value))}
+                    className="w-24 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-zinc-700"
+                />
+                <span className="text-sm w-10 text-right">{speed.toFixed(2)}x</span>
+            </div>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+                <label htmlFor="pitch-control" className="text-sm font-medium text-slate-600 dark:text-zinc-300">Pitch:</label>
+                <input 
+                    id="pitch-control"
+                    type="range"
+                    min="0.5" max="2" step="0.05"
+                    value={pitch}
+                    onChange={(e) => onPitchChange(parseFloat(e.target.value))}
+                    className="w-24 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-zinc-700"
+                />
+                <span className="text-sm w-10 text-right">{pitch.toFixed(2)}x</span>
             </div>
         </div>
     );

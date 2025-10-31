@@ -70,7 +70,7 @@ const AyahView: React.FC<AyahViewProps> = ({
   };
 
   return (
-    <div className={`p-4 md:p-6 group transition-colors duration-300 ${isHighlighted ? 'bg-blue-50 dark:bg-zinc-800/50' : ''}`}>
+    <div className={`px-4 md:px-6 py-12 group transition-colors duration-300 ${isHighlighted ? 'bg-blue-50 dark:bg-zinc-800/50' : ''}`}>
         <div className="flex items-start gap-4">
             <div className="flex flex-col items-center gap-2 flex-shrink-0">
                 <span className="font-sans text-sm text-slate-400 dark:text-zinc-500 select-none">{surah.id}:{ayah.id}</span>
