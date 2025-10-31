@@ -1,7 +1,5 @@
 {
   "name": "Quranic Reciter",
   "description": "An elegant web application to read and listen to the Holy Quran. Each verse can be recited using advanced Text-to-Speech technology, providing a beautiful and accessible experience.",
-  "requestFramePermissions": [
-    "microphone"
-  ]
+  "requestFramePermissions": []
 }

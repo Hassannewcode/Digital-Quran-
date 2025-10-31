@@ -5,7 +5,7 @@ export const PlayIcon: React.FC = () => (
 );
 
 export const StopIcon: React.FC = () => (
-    <span className="material-symbols-outlined text-blue-500">pause</span>
+    <span className="material-symbols-outlined">pause</span>
 );
 
 export const LoadingSpinner: React.FC = () => (
@@ -17,4 +17,16 @@ export const LoadingSpinner: React.FC = () => (
 
 export const ErrorIcon: React.FC = () => (
     <span className="material-symbols-outlined text-red-500">error</span>
+);
+
+export const NextIcon: React.FC = () => (
+    <span className="material-symbols-outlined">skip_next</span>
+);
+
+export const PreviousIcon: React.FC = () => (
+    <span className="material-symbols-outlined">skip_previous</span>
+);
+
+export const CloseIcon: React.FC = () => (
+    <span className="material-symbols-outlined">close</span>
 );

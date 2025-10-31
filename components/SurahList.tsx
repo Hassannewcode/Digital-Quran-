@@ -15,7 +15,7 @@ const SurahList: React.FC<SurahListProps> = ({ surahs, onSelect }) => {
             <button
             key={surah.id}
             onClick={() => onSelect(surah)}
-            className="group text-right p-4 bg-white dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-800 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="group text-right p-4 bg-white dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-800 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             aria-label={`Select Surah ${surah.name}`}
             >
             <div className="flex items-center justify-between">

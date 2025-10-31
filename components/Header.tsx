@@ -1,8 +1,8 @@
 import React from 'react';
-import { Surah } from '../types';
+import { Surah, View } from '../types';
 
 interface HeaderProps {
-  currentView: 'list' | 'detail' | 'bookmarks' | 'settings';
+  currentView: View;
   selectedSurah: Surah | null;
   onNavigate: (view: 'list' | 'bookmarks' | 'settings') => void;
   theme: 'light' | 'dark';
@@ -27,7 +27,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, selectedSurah, onNavigate,
     <header className="bg-white/80 backdrop-blur-md sticky top-0 z-20 shadow-sm border-b border-slate-200 dark:bg-zinc-900/80 dark:border-zinc-800">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          { (currentView === 'detail' || currentView === 'settings') && (
+          { currentView === 'detail' && (
             <button
               onClick={() => onNavigate('list')}
               className="text-slate-500 hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400 transition-colors duration-200 p-2 rounded-full -ml-2"
@@ -36,12 +36,12 @@ const Header: React.FC<HeaderProps> = ({ currentView, selectedSurah, onNavigate,
               <span className="material-symbols-outlined">arrow_back</span>
             </button>
           )}
-          <h1 className={`text-2xl font-bold tracking-wide ${['list', 'detail'].includes(currentView) ? 'font-arabic' : ''} ${currentView === 'detail' ? 'text-slate-800 dark:text-zinc-200' : 'text-blue-600 dark:text-blue-400'}`}>
+          <h1 className={`text-2xl font-bold tracking-wide ${['list', 'detail'].includes(currentView) ? 'font-arabic' : ''} ${['detail', 'settings', 'bookmarks'].includes(currentView) ? 'text-slate-800 dark:text-zinc-200' : 'text-blue-600 dark:text-blue-400'}`}>
             {getTitle()}
           </h1>
         </div>
         
-        <nav className="flex items-center gap-2">
+        <nav className="flex items-center gap-1 sm:gap-2">
             <button 
               onClick={() => onNavigate('list')}
               className={`px-3 py-1.5 rounded-md text-sm font-semibold transition-colors ${currentView === 'list' || currentView === 'detail' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300' : 'text-zinc-600 hover:bg-slate-200 dark:text-zinc-300 dark:hover:bg-zinc-800'}`}

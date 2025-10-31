@@ -1,0 +1,1 @@
+export const EN_QARAI_TRANSLATION: Record<string, Record<string, string>> = {};

@@ -15,9 +15,23 @@ interface AyahViewProps {
   onToggleBookmark: () => void;
   onSaveNote: (text: string) => void;
   onRegenerate: () => void;
+  isHighlighted: boolean;
 }
 
-const AyahView: React.FC<AyahViewProps> = ({ ayah, surah, onPlay, onStop, onStartLearning, playingState, isBookmarked, note, onToggleBookmark, onSaveNote, onRegenerate }) => {
+const AyahView: React.FC<AyahViewProps> = ({ 
+    ayah, 
+    surah, 
+    onPlay, 
+    onStop, 
+    onStartLearning, 
+    playingState, 
+    isBookmarked, 
+    note, 
+    onToggleBookmark, 
+    onSaveNote, 
+    onRegenerate,
+    isHighlighted
+}) => {
   const [showNote, setShowNote] = useState(false);
   const [noteText, setNoteText] = useState(note);
   const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
@@ -26,7 +40,7 @@ const AyahView: React.FC<AyahViewProps> = ({ ayah, surah, onPlay, onStop, onStar
     setNoteText(note);
   }, [note]);
 
-  const isCurrentAyah = (playingState.status !== 'idle' && playingState.surahId === surah.id && playingState.ayahId === ayah.id);
+  const isPlayingOrLoadingThisAyah = playingState.status !== 'idle' && playingState.surahId === surah.id && playingState.ayahId === ayah.id && playingState.mode === 'single';
   
   const handleNoteSave = () => {
     onSaveNote(noteText);
@@ -43,25 +57,32 @@ const AyahView: React.FC<AyahViewProps> = ({ ayah, surah, onPlay, onStop, onStar
   }
 
   const renderPlayButton = () => {
-    if (isCurrentAyah && playingState.mode === 'single') {
+    if (isPlayingOrLoadingThisAyah) {
         switch (playingState.status) {
             case 'loading': return <LoadingSpinner />;
-            case 'playing': return <StopIcon />;
             case 'error': return <ErrorIcon />;
+            case 'playing':
+            case 'paused':
+                return <span className="material-symbols-outlined text-blue-600 dark:text-blue-400">volume_up</span>;
         }
     }
     return <PlayIcon />;
   };
 
   return (
-    <div className={`p-4 md:p-6 group transition-colors duration-300 ${isCurrentAyah ? 'bg-blue-50 dark:bg-zinc-800/50' : ''}`}>
+    <div className={`p-4 md:p-6 group transition-colors duration-300 ${isHighlighted ? 'bg-blue-50 dark:bg-zinc-800/50' : ''}`}>
         <div className="flex items-start gap-4">
             <div className="flex flex-col items-center gap-2 flex-shrink-0">
                 <span className="font-sans text-sm text-slate-400 dark:text-zinc-500 select-none">{surah.id}:{ayah.id}</span>
                 <button 
-                    onClick={onPlay}
-                    className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-blue-100 hover:text-blue-600 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-blue-400 transition-all duration-200"
+                    onClick={isPlayingOrLoadingThisAyah ? undefined : onPlay}
+                    className={`w-10 h-10 flex items-center justify-center rounded-full transition-all duration-200 ${
+                        isPlayingOrLoadingThisAyah
+                            ? 'bg-blue-100 dark:bg-blue-900/50'
+                            : 'bg-slate-100 text-slate-500 hover:bg-blue-100 hover:text-blue-600 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700 dark:hover:text-blue-400'
+                    }`}
                     aria-label={`Play Ayah ${surah.id}:${ayah.id}`}
+                    disabled={isPlayingOrLoadingThisAyah && playingState.status !== 'error'}
                 >
                     {renderPlayButton()}
                 </button>

@@ -11,16 +11,17 @@ export interface Surah {
   ayahs: Ayah[];
 }
 
-export type PlayingStatus = 'idle' | 'loading' | 'playing' | 'error';
+export type PlayingStatus = 'idle' | 'loading' | 'playing' | 'paused' | 'error';
 export type PlayingMode = 'single' | 'verse-by-verse' | 'full-surah';
 export type LearningModeType = 'none' | 'highlight' | 'memory';
+export type View = 'list' | 'detail' | 'bookmarks' | 'settings';
 
 export type PlayingState = {
     status: 'idle';
 } | {
     status: PlayingStatus;
     surahId: number;
-    ayahId: number;
+    ayahId: number; // For single/verse-by-verse: current ayah. For range modes: start ayah of range/chunk.
     mode: PlayingMode;
 };
 

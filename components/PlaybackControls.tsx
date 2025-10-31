@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Surah, PlayingState, LearningModeType } from '../types';
 import { PlayIcon, StopIcon, LoadingSpinner } from './icons/PlaybackIcons';
 import { LearnIcon } from './icons/FeatureIcons';
+import PlaybackSettingsModal from './PlaybackSettingsModal';
 
 interface PlaybackControlsProps {
   surah: Surah;
   playingState: PlayingState;
   onPlayRange: (surah: Surah, mode: 'verse-by-verse' | 'full-surah') => void;
+  onStop: () => void;
   onStartLearning: (mode: LearningModeType) => void;
   playbackRange: { start: number; end: number };
   onPlaybackRangeChange: (range: { start: number; end: number }) => void;
@@ -14,13 +16,13 @@ interface PlaybackControlsProps {
   onRepeatCountChange: (count: number) => void;
   isInfinite: boolean;
   onIsInfiniteChange: (isInfinite: boolean) => void;
-  isLargeForContinuous: boolean;
 }
 
 const PlaybackControls: React.FC<PlaybackControlsProps> = ({ 
     surah, 
     playingState, 
-    onPlayRange, 
+    onPlayRange,
+    onStop,
     onStartLearning,
     playbackRange,
     onPlaybackRangeChange,
@@ -28,64 +30,15 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     onRepeatCountChange,
     isInfinite,
     onIsInfiniteChange,
-    isLargeForContinuous,
  }) => {
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  const [fromInput, setFromInput] = useState(playbackRange.start.toString());
-  const [toInput, setToInput] = useState(playbackRange.end.toString());
-  const [repeatInput, setRepeatInput] = useState(repeatCount.toString());
-
-  useEffect(() => {
-    setFromInput(playbackRange.start.toString());
-    setToInput(playbackRange.end.toString());
-  }, [playbackRange, surah]);
-
-  useEffect(() => {
-    setRepeatInput(repeatCount.toString());
-  }, [repeatCount]);
-
-  const isPlayingVerseByVerse = playingState.status !== 'idle' && playingState.mode === 'verse-by-verse' && playingState.surahId === surah.id;
+  const isAnyPlaybackActive = playingState.status !== 'idle';
+  const isLoadingContinuous = playingState.status === 'loading' && playingState.mode === 'full-surah' && playingState.surahId === surah.id;
   const isLoadingVerseByVerse = playingState.status === 'loading' && playingState.mode === 'verse-by-verse' && playingState.surahId === surah.id;
-  
-  const isPlayingFullSurah = playingState.status !== 'idle' && playingState.mode === 'full-surah' && playingState.surahId === surah.id;
-  const isLoadingFullSurah = playingState.status === 'loading' && playingState.mode === 'full-surah' && playingState.surahId === surah.id;
-
-  const handleFromBlur = () => {
-    let num = parseInt(fromInput, 10);
-    if (isNaN(num)) num = 1;
-    num = Math.max(1, Math.min(surah.ayahs.length, num));
-    setFromInput(num.toString());
-
-    if (num > playbackRange.end) {
-        onPlaybackRangeChange({ start: num, end: num });
-    } else {
-        onPlaybackRangeChange({ ...playbackRange, start: num });
-    }
-  };
-
-  const handleToBlur = () => {
-    let num = parseInt(toInput, 10);
-    if (isNaN(num)) num = surah.ayahs.length;
-    num = Math.max(playbackRange.start, Math.min(surah.ayahs.length, num));
-    setToInput(num.toString());
-    onPlaybackRangeChange({ ...playbackRange, end: num });
-  };
-  
-  const handleRepeatBlur = () => {
-    let num = parseInt(repeatInput, 10);
-    if (isNaN(num) || num < 0) num = 0;
-    if (num > 10000) num = 10000; // a reasonable limit
-    setRepeatInput(num.toString());
-    onRepeatCountChange(num);
-  };
-
-  const handleInfiniteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onIsInfiniteChange(e.target.checked);
-  }
-  
-  const anyLoading = isLoadingVerseByVerse || isLoadingFullSurah;
 
   return (
+    <>
     <div className="mb-6 p-4 bg-white dark:bg-zinc-900 rounded-lg shadow-sm border border-slate-200 dark:border-zinc-800">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
             <div className="mb-4 sm:mb-0">
@@ -97,22 +50,29 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
             <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                 <button
                     onClick={() => onPlayRange(surah, 'verse-by-verse')}
-                    className="flex items-center justify-center w-full sm:w-auto gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors disabled:bg-blue-400 dark:disabled:bg-blue-800/50 disabled:cursor-not-allowed"
-                    aria-label={isPlayingVerseByVerse ? `Stop recitation of Surah ${surah.name}` : `Play Surah ${surah.name} verse by verse`}
-                    disabled={anyLoading}
+                    className="flex items-center justify-center w-full sm:w-auto gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors disabled:bg-blue-400 dark:disabled:bg-zinc-700 disabled:cursor-not-allowed"
+                    aria-label={`Play Surah ${surah.name} verse by verse`}
+                    disabled={isAnyPlaybackActive}
                 >
-                    {isLoadingVerseByVerse ? <LoadingSpinner/> : isPlayingVerseByVerse ? <StopIcon/> : <PlayIcon/>}
-                    <span>{isPlayingVerseByVerse ? 'Stop' : 'Play (Verses)'}</span>
+                    {isLoadingVerseByVerse ? <LoadingSpinner/> : <PlayIcon/>}
+                    <span>Play (Verses)</span>
                 </button>
-                <button
+
+                 <button
                     onClick={() => onPlayRange(surah, 'full-surah')}
                     className="flex items-center justify-center w-full sm:w-auto gap-2 px-4 py-2 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 transition-colors disabled:bg-slate-400 dark:disabled:bg-zinc-700 disabled:cursor-not-allowed"
-                    aria-label={isPlayingFullSurah ? `Stop recitation` : `Play recitation non-stop`}
-                    disabled={anyLoading || isLargeForContinuous}
-                    title={isLargeForContinuous ? 'Range too long for non-stop playback. Please select fewer verses.' : 'Play selected range as one continuous audio file.'}
+                    aria-label={`Play recitation non-stop`}
+                    disabled={isAnyPlaybackActive}
                 >
-                    {isLoadingFullSurah ? <LoadingSpinner/> : isPlayingFullSurah ? <StopIcon/> : <PlayIcon/>}
-                    <span>{isPlayingFullSurah ? 'Stop' : 'Play (Non-stop)'}</span>
+                    {isLoadingContinuous ? <LoadingSpinner/> : <PlayIcon />}
+                    <span>{isLoadingContinuous ? 'Generating...' : 'Play Continuous'}</span>
+                </button>
+                 <button
+                    onClick={() => setIsSettingsOpen(true)}
+                    className="flex items-center justify-center w-full sm:w-auto px-4 py-2 rounded-lg bg-slate-200 text-slate-700 dark:bg-zinc-700 dark:text-zinc-200 font-semibold transition-colors hover:bg-slate-300 dark:hover:bg-zinc-600"
+                    title="Playback Settings"
+                >
+                    <span className="material-symbols-outlined">tune</span>
                 </button>
             </div>
         </div>
@@ -143,61 +103,19 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
               </div>
           </div>
         </div>
-
-        <div className="mt-4 pt-4 border-t border-slate-200 dark:border-zinc-800 flex flex-col sm:flex-row items-center gap-4 sm:gap-6 justify-start flex-wrap">
-            <h3 className="text-sm font-semibold text-slate-600 dark:text-zinc-400 self-center sm:self-auto w-full sm:w-auto">Playback Options:</h3>
-            <div className="flex items-center gap-2">
-                <label htmlFor="start-ayah" className="text-sm font-medium">From:</label>
-                 <input 
-                    id="start-ayah"
-                    type="number"
-                    value={fromInput}
-                    onChange={(e) => setFromInput(e.target.value)}
-                    onBlur={handleFromBlur}
-                    min="1"
-                    max={surah.ayahs.length}
-                    className="block w-20 px-2 py-1.5 text-base bg-white dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 text-slate-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-md"
-                 />
-            </div>
-            <div className="flex items-center gap-2">
-                <label htmlFor="end-ayah" className="text-sm font-medium">To:</label>
-                <input
-                    id="end-ayah"
-                    type="number"
-                    value={toInput}
-                    onChange={(e) => setToInput(e.target.value)}
-                    onBlur={handleToBlur}
-                    min={playbackRange.start}
-                    max={surah.ayahs.length}
-                    className="block w-20 px-2 py-1.5 text-base bg-white dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 text-slate-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-md"
-                 />
-            </div>
-            <div className="flex items-center gap-2">
-                <label htmlFor="repeat-count" className="text-sm font-medium">Repeat:</label>
-                <input 
-                    id="repeat-count"
-                    type="number"
-                    value={repeatInput}
-                    onChange={(e) => setRepeatInput(e.target.value)}
-                    onBlur={handleRepeatBlur}
-                    min="0"
-                    max="10000"
-                    disabled={isInfinite}
-                    className="block w-20 px-2 py-1.5 text-base bg-white dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 text-slate-900 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-md disabled:bg-slate-100 dark:disabled:bg-zinc-800/50"
-                 />
-            </div>
-             <div className="flex items-center gap-2">
-                <input
-                    id="infinite-loop"
-                    type="checkbox"
-                    checked={isInfinite}
-                    onChange={handleInfiniteChange}
-                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <label htmlFor="infinite-loop" className="text-sm font-medium">Infinite</label>
-            </div>
-        </div>
     </div>
+    <PlaybackSettingsModal 
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        surah={surah}
+        playbackRange={playbackRange}
+        onPlaybackRangeChange={onPlaybackRangeChange}
+        repeatCount={repeatCount}
+        onRepeatCountChange={onRepeatCountChange}
+        isInfinite={isInfinite}
+        onIsInfiniteChange={onIsInfiniteChange}
+    />
+    </>
   );
 };
 

@@ -1,4 +1,12 @@
 
+export function encode(bytes: Uint8Array): string {
+  let binary = '';
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
 
 export function decode(base64: string): Uint8Array {
   const binaryString = atob(base64);

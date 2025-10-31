@@ -6,7 +6,7 @@ import SettingsPanel from './SettingsPanel';
 
 interface SurahDetailProps {
   surah: Surah;
-  onPlay: (ayah: Ayah, surahId: number) => void;
+  onPlay: (ayah: Ayah) => void;
   onStop: () => void;
   playingState: PlayingState;
   isBookmarked: (surahId: number, ayahId: number) => boolean;
@@ -30,8 +30,6 @@ interface SurahDetailProps {
   onIsInfiniteChange: (isInfinite: boolean) => void;
   onRegenerateAyah: (surahId: number, ayahId: number) => void;
 }
-
-const AYAH_THRESHOLD_FOR_CONTINUOUS_PLAY = 4500;
 
 const SurahDetail: React.FC<SurahDetailProps> = ({ 
     surah, 
@@ -57,17 +55,13 @@ const SurahDetail: React.FC<SurahDetailProps> = ({
     onRepeatCountChange,
     isInfinite,
     onIsInfiniteChange,
-    onRegenerateAyah
+    onRegenerateAyah,
 }) => {
   const surahNotes = notes
     .filter(note => note.surahId === surah.id)
     .sort((a, b) => a.ayahId - b.ayahId);
   const hasNotes = surahNotes.length > 0;
-
-  const ayahsInRange = surah.ayahs.slice(playbackRange.start - 1, playbackRange.end);
-  const charCountInRange = ayahsInRange.reduce((acc, ayah) => acc + ayah.text.length, 0);
-  const isLargeForContinuous = charCountInRange > AYAH_THRESHOLD_FOR_CONTINUOUS_PLAY;
-
+  
   return (
     <>
     <SettingsPanel
@@ -105,6 +99,7 @@ const SurahDetail: React.FC<SurahDetailProps> = ({
           surah={surah}
           playingState={playingState}
           onPlayRange={onPlayRange}
+          onStop={onStop}
           onStartLearning={(mode) => onStartLearning(surah, playbackRange, mode)}
           playbackRange={playbackRange}
           onPlaybackRangeChange={onPlaybackRangeChange}
@@ -112,8 +107,8 @@ const SurahDetail: React.FC<SurahDetailProps> = ({
           onRepeatCountChange={onRepeatCountChange}
           isInfinite={isInfinite}
           onIsInfiniteChange={onIsInfiniteChange}
-          isLargeForContinuous={isLargeForContinuous}
         />
+        
         <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-md divide-y divide-slate-200 dark:divide-zinc-800">
           {surah.id !== 1 && surah.id !== 9 && (
             <div className="p-4 md:p-6">
@@ -122,22 +117,34 @@ const SurahDetail: React.FC<SurahDetailProps> = ({
                 </p>
             </div>
           )}
-          {surah.ayahs.map((ayah) => (
-            <AyahView
-                key={ayah.id}
-                ayah={ayah}
-                surah={surah}
-                onPlay={() => onPlay(ayah, surah.id)}
-                onStop={onStop}
-                onStartLearning={() => onStartLearning(surah, {start: ayah.id, end: ayah.id}, 'highlight')}
-                playingState={playingState}
-                isBookmarked={isBookmarked(surah.id, ayah.id)}
-                note={getNoteForAyah(surah.id, ayah.id)}
-                onToggleBookmark={() => onToggleBookmark(surah.id, ayah.id)}
-                onSaveNote={(text) => onSaveNote(surah.id, ayah.id, text)}
-                onRegenerate={() => onRegenerateAyah(surah.id, ayah.id)}
-            />
-          ))}
+          {surah.ayahs.map((ayah) => {
+            let isHighlighted = false;
+             if (playingState.status !== 'idle' && playingState.surahId === surah.id) {
+                if (playingState.mode === 'single' || playingState.mode === 'verse-by-verse') {
+                    isHighlighted = playingState.ayahId === ayah.id;
+                } else if (playingState.mode === 'full-surah') {
+                    isHighlighted = ayah.id >= playbackRange.start && ayah.id <= playbackRange.end;
+                }
+            }
+
+            return (
+                <AyahView
+                    key={ayah.id}
+                    ayah={ayah}
+                    surah={surah}
+                    onPlay={() => onPlay(ayah)}
+                    onStop={onStop}
+                    onStartLearning={() => onStartLearning(surah, {start: ayah.id, end: ayah.id}, 'highlight')}
+                    playingState={playingState}
+                    isBookmarked={isBookmarked(surah.id, ayah.id)}
+                    note={getNoteForAyah(surah.id, ayah.id)}
+                    onToggleBookmark={() => onToggleBookmark(surah.id, ayah.id)}
+                    onSaveNote={(text) => onSaveNote(surah.id, ayah.id, text)}
+                    onRegenerate={() => onRegenerateAyah(surah.id, ayah.id)}
+                    isHighlighted={isHighlighted}
+                />
+            )
+          })}
         </div>
       </div>
     </div>

@@ -11,13 +11,6 @@ interface SettingsViewProps {
     onTranslationChange: (id: string) => void;
 }
 
-const tableData = [
-    { area: 'Textual Authority', inspiration: 'King Fahd Complex & Tanzil.net', weight: '100% of Core Data', value: 'Unquestionable Accuracy: Uses the official Madinah Mushaf standard for the raw Arabic text.' },
-    { area: 'Core Experience', inspiration: 'Quran.com & KSU-Ayat', weight: '50% of Interface Features', value: 'Usability & Access: Modern, intuitive interface with fast loading, integrated high-quality audio recitations, and numerous translations.' },
-    { area: 'Academic Depth', inspiration: 'Corpus.Quran.com', weight: '30% of Interface Features', value: 'Linguistic Study: In-depth word-by-word morphological analysis, syntax trees, and grammatical tagging for every word.' },
-    { area: 'Learning & Practice', inspiration: 'UQU Maqraah & Al-Harmain Maqraa', weight: '20% of Interface Features', value: 'Recitation & Memorization: Structured modules for tajwīd practice, guided recitation sessions, and memorization aids.' },
-];
-
 const inspirationLinks = [
     { name: 'KSU-Electronic Moshaf project (Ayat)', url: 'https://quran.ksu.edu.sa' },
     { name: 'King Fahd Complex for the Printing of the Holy Quran', url: 'https://qurancomplex.gov.sa' },
@@ -26,42 +19,72 @@ const inspirationLinks = [
     { name: 'Quran.com', url: 'https://quran.com' },
     { name: 'Tanzil.net', url: 'https://tanzil.net' },
     { name: 'Corpus.Quran.com (The Quranic Arabic Corpus)', url: 'https://corpus.quran.com' },
-    { name: 'Arabic101.org', url: 'https://arabic101.org' },
 ];
 
 const SettingsView: React.FC<SettingsViewProps> = (props) => {
   return (
-    <div className="max-w-4xl mx-auto space-y-12">
+    <div className="max-w-4xl mx-auto space-y-12 text-slate-700 dark:text-zinc-300">
       <SettingsPanel {...props} />
 
-      <section className="text-slate-700 dark:text-zinc-300">
-        <h2 className="text-2xl font-bold border-b-2 border-blue-500 pb-2 mb-6">Our Inspiration & Feature Breakdown</h2>
-        <p className="mb-6 leading-relaxed">This application is inspired by the world's best Quranic platforms. Our goal is to blend authoritative text with powerful, modern study tools. The platform's design is guided by the following principles:</p>
+      {/* Section 1: Recitation Styles */}
+      <section>
+        <h2 className="text-2xl font-bold border-b-2 border-blue-500 pb-2 mb-6">Recitation Styles: Mujawwad vs. Murattal</h2>
+        <div className="space-y-4 text-base leading-relaxed">
+          <p>The Holy Quran can be recited in several styles, each with its own unique characteristics and purpose. Two of the most prominent styles are Mujawwad and Murattal. Understanding their differences can enrich your listening experience.</p>
+        </div>
         
-        <div className="overflow-x-auto">
-            <div className="min-w-full inline-block align-middle">
-                <div className="border rounded-lg shadow dark:border-zinc-700 bg-white dark:bg-zinc-800/20">
-                    <table className="min-w-full divide-y divide-gray-200 dark:divide-zinc-700">
-                        <thead className="bg-gray-50 dark:bg-zinc-800/50">
-                            <tr>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Functional Area</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Combined Feature Inspiration</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Percentage Weight</th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Core Value Delivered</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white dark:bg-zinc-900 divide-y divide-gray-200 dark:divide-zinc-700">
-                            {tableData.map((row) => (
-                                <tr key={row.area}>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">{row.area}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{row.inspiration}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{row.weight}</td>
-                                    <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{row.value}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+        <div className="mt-8 overflow-x-auto">
+          <div className="min-w-full inline-block align-middle">
+            <div className="border rounded-lg shadow dark:border-zinc-700 bg-white dark:bg-zinc-900">
+              <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x dark:divide-zinc-700">
+                <div className="font-semibold p-4 bg-slate-50 dark:bg-zinc-800 rounded-t-lg md:rounded-tr-none md:rounded-l-lg">Feature</div>
+                <div className="font-semibold p-4 bg-slate-50 dark:bg-zinc-800">Mujawwad (Melodic)</div>
+                <div className="font-semibold p-4 bg-slate-50 dark:bg-zinc-800 rounded-t-lg md:rounded-tr-lg">Murattal (Measured)</div>
+                
+                <div className="font-semibold p-4 md:bg-slate-50 md:dark:bg-zinc-800">Pacing</div>
+                 <div className="p-4 col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x dark:divide-zinc-700">
+                    <div className="p-4 md:p-0 md:px-4">Slower and more ornamental, allowing for extensive vocal performance.</div>
+                    <div className="p-4 md:p-0 md:px-4">Faster, with a measured and even tone.</div>
                 </div>
+
+                <div className="font-semibold p-4 md:bg-slate-50 md:dark:bg-zinc-800">Emphasis</div>
+                 <div className="p-4 col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x dark:divide-zinc-700">
+                    <div className="p-4 md:p-0 md:px-4">Focuses on melody and the artistic beauty of the recitation.</div>
+                    <div className="p-4 md:p-0 md:px-4">Emphasizes proper pronunciation (tajweed), clarity, and understanding.</div>
+                </div>
+
+                <div className="font-semibold p-4 rounded-b-lg md:rounded-bl-lg md:rounded-br-none md:bg-slate-50 md:dark:bg-zinc-800">Use Case</div>
+                 <div className="p-4 col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x dark:divide-zinc-700 rounded-b-lg">
+                    <div className="p-4 md:p-0 md:px-4">Typically used for formal events and spiritual gatherings.</div>
+                    <div className="p-4 md:p-0 md:px-4">Common for personal recitation, teaching, and memorization.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+       <section>
+        <h2 className="text-2xl font-bold border-b-2 border-blue-500 pb-2 mb-6">Our Inspiration &amp; Feature Breakdown</h2>
+        <p className="mb-6 leading-relaxed">This application is inspired by the world's best Quranic platforms. Our goal is to blend authoritative text with powerful, modern study tools. The platform's design is guided by the following principles:</p>
+
+        <div className="space-y-8">
+            <div className="p-6 bg-white dark:bg-zinc-900 rounded-lg shadow-md border dark:border-zinc-800">
+                <h3 className="text-xl font-bold text-blue-600 dark:text-blue-400">1. Core Textual Integrity (100% of Data)</h3>
+                <p className="mt-2 leading-relaxed">The single most important component is the raw, authoritative Quranic text, sourced from highly-verified digital text projects like Tanzil.net.</p>
+            </div>
+
+            <div className="p-6 bg-white dark:bg-zinc-900 rounded-lg shadow-md border dark:border-zinc-800">
+                <h3 className="text-xl font-bold text-blue-600 dark:text-blue-400">2. Core Experience & Interface (50% of Features)</h3>
+                <p className="mt-2 leading-relaxed">The platform must be universally accessible, intuitive, and modern, making the authoritative text easy to use for everyone.</p>
+            </div>
+
+            <div className="p-6 bg-white dark:bg-zinc-900 rounded-lg shadow-md border dark:border-zinc-800">
+                <h3 className="text-xl font-bold text-blue-600 dark:text-blue-400">3. Advanced Study & Learning Tools (50% of Features)</h3>
+                 <ul className="mt-4 space-y-3 list-disc list-inside">
+                    <li><span className="font-semibold">Recitation & Memorization (20%):</span> High-quality audio from multiple renowned reciters, customizable looping, and an integrated system for tracking memorization.</li>
+                    <li><span className="font-semibold">Linguistic & Translational Study (30%):</span> Side-by-side access to multiple top-tier translations and word-by-word analysis tools.</li>
+                </ul>
             </div>
         </div>
       </section>
