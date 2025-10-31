@@ -266,14 +266,18 @@ const App: React.FC = () => {
         };
 
     } catch (error) {
-      console.error("Error playing audio:", error);
-      let message = "Audio playback failed. Please try again.";
-      if (error instanceof Error && error.message.includes("No audio data returned")) {
-          message = "Audio generation failed. The voice may be busy or the Surah is too long for this mode.";
-      }
-      setToastMessage(message);
-      setPlayingState({ status: 'error', surahId: surah.id, ayahId: ayah.id, mode });
-      stopPlayback();
+        console.error("Error playing audio:", error);
+        let message = "Audio playback failed. Please try again.";
+        if (error instanceof Error) {
+            if (error.message.includes("No audio data returned")) {
+                message = "Audio generation failed. The voice may be busy or the Surah is too long for this mode.";
+            } else if (error.message.includes("API_KEY is not configured")) {
+                message = "API Key is not configured for this deployment.";
+            }
+        }
+        setToastMessage(message);
+        setPlayingState({ status: 'error', surahId: surah.id, ayahId: ayah.id, mode });
+        stopPlayback();
     }
   }, [playingState.status, stopPlayback, selectedReciterId, volume, playAudioBuffer, playbackRange.end, isInfinite, repeatCount]);
 
@@ -347,21 +351,21 @@ const App: React.FC = () => {
     }
   }, [playingState.status, stopElapsedTimer, startElapsedTimer]);
   
+  // Fix: Refactor guard clause for proper type narrowing by combining checks into a single block.
   const changeVerse = useCallback((direction: 'next' | 'previous') => {
     // Fix: Refactor guard clause for proper type narrowing.
-    if (playingState.status === 'idle' || !playerSurah) return;
-    if (playingState.mode === 'full-surah') return;
-    
-    const { ayahId } = playingState;
-    const currentIdx = playerSurah.ayahs.findIndex(a => a.id === ayahId);
-    
-    const newIdx = direction === 'next' ? currentIdx + 1 : currentIdx - 1;
+    if (playingState.status !== 'idle' && playerSurah && playingState.mode !== 'full-surah') {
+        const { ayahId } = playingState;
+        const currentIdx = playerSurah.ayahs.findIndex(a => a.id === ayahId);
+        
+        const newIdx = direction === 'next' ? currentIdx + 1 : currentIdx - 1;
 
-    if (newIdx >= 0 && newIdx < playerSurah.ayahs.length) {
-      const newAyah = playerSurah.ayahs[newIdx];
-      const newCacheKey = `${selectedReciterId}-${playerSurah.id}-${newAyah.id}`;
-      stopPlayback();
-      setTimeout(() => handlePlayAyah(newAyah, playerSurah, 'single', newCacheKey), 100);
+        if (newIdx >= 0 && newIdx < playerSurah.ayahs.length) {
+            const newAyah = playerSurah.ayahs[newIdx];
+            const newCacheKey = `${selectedReciterId}-${playerSurah.id}-${newAyah.id}`;
+            stopPlayback();
+            setTimeout(() => handlePlayAyah(newAyah, playerSurah, 'single', newCacheKey), 100);
+        }
     }
   }, [playerSurah, playingState, selectedReciterId, handlePlayAyah, stopPlayback]);
 

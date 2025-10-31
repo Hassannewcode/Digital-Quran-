@@ -1,19 +1,19 @@
 import { GoogleGenAI, Modality } from "@google/genai";
 
-const apiKey = process.env.API_KEY;
-
-if (!apiKey) {
-  // This provides a clear error if the API key isn't configured in the deployment environment.
-  throw new Error("API_KEY environment variable is not set. Please ensure it is configured in your deployment environment.");
-}
-
-const ai = new GoogleGenAI({ apiKey });
-
 export async function generateSpeech(
   text: string, 
   voiceName: 'Zephyr' | 'Kore' | 'Puck' | 'Charon' | 'Fenrir' = 'Zephyr',
   stylePrompt?: string
 ): Promise<string> {
+  const apiKey = process.env.API_KEY;
+
+  if (!apiKey) {
+    // Throw a specific error that the UI can catch and handle gracefully.
+    throw new Error("API_KEY is not configured. Please set it in your environment variables.");
+  }
+  
+  const ai = new GoogleGenAI({ apiKey });
+
   try {
     // Sanitize text for TTS, removing non-pronounced symbols.
     const cleanText = text.replace(/[۞۩]/g, '').trim();
