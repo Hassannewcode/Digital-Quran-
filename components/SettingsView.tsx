@@ -43,22 +43,34 @@ const SettingsView: React.FC<SettingsViewProps> = ({ installPrompt, handleInstal
 
       <SettingsPanel {...props} />
 
-      {installPrompt && (
-        <section>
-          <h2 className="text-2xl font-bold border-b-2 border-blue-500 pb-2 mb-6">Install Application</h2>
-          <div className="p-6 bg-white dark:bg-zinc-900 rounded-lg shadow-md border dark:border-zinc-800 space-y-4 text-center">
-            <p className="leading-relaxed">For the best experience, install the Quranic Reciter on your device. This enables offline access and a native app feel.</p>
-            <button
-              onClick={handleInstall}
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 transition-colors"
-              aria-label="Install Quranic Reciter app"
-            >
-              <span className="material-symbols-outlined">download</span>
-              <span>Install App</span>
-            </button>
-          </div>
-        </section>
-      )}
+      <section>
+        <h2 className="text-2xl font-bold border-b-2 border-blue-500 pb-2 mb-6">Install Application</h2>
+        <div className="p-6 bg-white dark:bg-zinc-900 rounded-lg shadow-md border dark:border-zinc-800 space-y-4">
+          <p className="leading-relaxed text-center">For the best experience, install the Quranic Reciter on your device. This enables offline access and a native app feel.</p>
+          {installPrompt ? (
+            <div className="text-center">
+              <button
+                onClick={handleInstall}
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 transition-colors"
+                aria-label="Install Quranic Reciter app"
+              >
+                <span className="material-symbols-outlined">download</span>
+                <span>Install App</span>
+              </button>
+            </div>
+          ) : (
+             <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 rounded-r-lg text-blue-800 dark:text-blue-300 text-sm">
+                 <p className="font-semibold">App Installed or Manual Installation Required</p>
+                 <p className="mt-1">This app can be added to your home screen for a native experience.</p>
+                 <ul className="list-disc list-inside mt-2 space-y-1">
+                    <li><strong>Chrome/Edge:</strong> Look for an "Install" icon in the address bar, or check your browser's menu.</li>
+                    <li><strong>Safari (iOS):</strong> Tap the "Share" button, then scroll down and select "Add to Home Screen".</li>
+                    <li><strong>Android:</strong> Your browser should prompt you to install, or you can find "Add to Home Screen" in the browser menu.</li>
+                 </ul>
+              </div>
+          )}
+        </div>
+      </section>
 
       {/* Section 1: Recitation Styles */}
       <section>

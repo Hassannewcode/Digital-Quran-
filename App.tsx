@@ -12,6 +12,8 @@ import Player from './components/Player';
 import RecitationPractice from './components/learning/RecitationPractice';
 import { decode, decodeAudioData } from './utils/audioUtils';
 import { useLocalStorage } from './hooks/useLocalStorage';
+import { useTheme } from './hooks/useTheme';
+import { usePwaInstall } from './hooks/usePwaInstall';
 import { RECITERS, TRANSLATIONS } from './constants/settings';
 import Toast from './components/Toast';
 
@@ -30,9 +32,9 @@ const App: React.FC = () => {
   const [currentAyah, setCurrentAyah] = useState<Ayah | null>(null);
   const [toastMessage, setToastMessage] = useState<string>('');
   const [learningSession, setLearningSession] = useState<LearningSession | null>(null);
-  const [installPrompt, setInstallPrompt] = useState<Event | null>(null);
-  const isInstalled = useRef(false);
-
+  
+  const { installPrompt, handleInstall } = usePwaInstall();
+  const [theme, toggleTheme] = useTheme();
 
   const [playbackRange, setPlaybackRange] = useState<{ start: number; end: number }>({ start: 1, end: 1 });
   const [repeatCount, setRepeatCount] = useState(0); // 0 = off
@@ -42,10 +44,6 @@ const App: React.FC = () => {
   const [totalTime, setTotalTime] = useState(0);
 
   const [volume, setVolume] = useLocalStorage('volume', 1);
-  const [theme, setTheme] = useLocalStorage<'light' | 'dark'>('theme', 
-    () => window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-  );
-
   const [pitch, setPitch] = useLocalStorage('pitch', 1.0);
   const [speed, setSpeed] = useLocalStorage('speed', 1.0);
 
@@ -79,58 +77,31 @@ const App: React.FC = () => {
   }, [selectedReciter, setPitch, setSpeed]);
 
   useEffect(() => {
-    const handler = (e: Event) => {
-      e.preventDefault();
-      if (!isInstalled.current) {
-        setInstallPrompt(e);
-      }
-    };
-    window.addEventListener('beforeinstallprompt', handler);
+    const newSurahs = getSurahsWithTranslation(selectedTranslation?.data || null);
+    setSurahs(newSurahs);
 
-    window.addEventListener('appinstalled', () => {
-      isInstalled.current = true;
-      setInstallPrompt(null);
-    });
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handler);
-      window.removeEventListener('appinstalled', () => {});
-    };
-  }, []);
-
-  const handleInstall = useCallback(() => {
-    if (!installPrompt) return;
-    (installPrompt as any).prompt();
-    (installPrompt as any).userChoice.then((choiceResult: { outcome: 'accepted' | 'dismissed' }) => {
-      if (choiceResult.outcome === 'accepted') {
-        isInstalled.current = true;
-      }
-      setInstallPrompt(null);
-    });
-  }, [installPrompt]);
-
-
-  useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [theme]);
-
-  useEffect(() => {
-    setSurahs(getSurahsWithTranslation(selectedTranslation?.data || null));
     if (playerSurah) {
-        setPlayerSurah(s => s ? getSurahsWithTranslation(selectedTranslation?.data || null).find(newS => newS.id === s.id) || null : null);
-    }
-    if(currentAyah && playerSurah){
-        const surah = getSurahsWithTranslation(selectedTranslation?.data || null).find(s => s.id === playerSurah.id);
-        if(surah){
-            const ayah = surah.ayahs.find(a => a.id === currentAyah.id);
-            if(ayah) setCurrentAyah(ayah);
+      const newPlayerSurah = newSurahs.find(s => s.id === playerSurah.id) || null;
+      // Use functional update with a check to prevent re-render loops if the object data is the same
+      setPlayerSurah(current => {
+        if (current && JSON.stringify(newPlayerSurah) !== JSON.stringify(current)) {
+          return newPlayerSurah;
         }
+        return current;
+      });
+
+      if (currentAyah) {
+        const surahForAyah = newSurahs.find(s => s.id === playerSurah.id);
+        if (surahForAyah) {
+          const newCurrentAyah = surahForAyah.ayahs.find(a => a.id === currentAyah.id);
+          if (newCurrentAyah && JSON.stringify(newCurrentAyah) !== JSON.stringify(currentAyah)) {
+            setCurrentAyah(newCurrentAyah);
+          }
+        }
+      }
     }
-  }, [selectedTranslation, playerSurah, currentAyah]);
+  }, [selectedTranslation, playerSurah?.id, currentAyah?.id]);
+
 
   useEffect(() => {
     if (toastMessage) {
@@ -440,10 +411,6 @@ const App: React.FC = () => {
     setView('detail');
     window.scrollTo(0, 0);
   };
-  
-  const handleThemeToggle = () => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light');
-  };
 
   const handleNavigate = (newView: View) => {
     stopPlayback();
@@ -624,13 +591,13 @@ const App: React.FC = () => {
   const mainContentPadding = playingState.status !== 'idle' ? 'pb-40' : 'pb-8';
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-zinc-950 dark:text-zinc-300">
+    <div className="min-h-screen">
       <Header 
         currentView={view} 
         selectedSurah={selectedSurah} 
         onNavigate={handleNavigate}
         theme={theme}
-        onThemeToggle={handleThemeToggle} 
+        onThemeToggle={toggleTheme} 
       />
       <main className={`container mx-auto px-4 py-8 ${mainContentPadding}`}>
         {renderContent()}
