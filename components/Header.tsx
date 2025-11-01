@@ -9,6 +9,16 @@ interface HeaderProps {
   onThemeToggle: () => void;
 }
 
+const Logo = () => (
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-blue-600 dark:text-blue-400">
+    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M6.5 2H20v15H6.5A2.5 2.5 0 0 1 4 14.5V4.5A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M9 7h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M9 11h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+  </svg>
+);
+
+
 const Header: React.FC<HeaderProps> = ({ currentView, selectedSurah, onNavigate, theme, onThemeToggle }) => {
   const getTitle = () => {
     if (currentView === 'detail' && selectedSurah) {
@@ -27,7 +37,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, selectedSurah, onNavigate,
     <header className="bg-white/80 backdrop-blur-md sticky top-0 z-20 shadow-sm border-b border-slate-200 dark:bg-zinc-900/80 dark:border-zinc-800">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          { currentView === 'detail' && (
+          { currentView === 'detail' ? (
             <button
               onClick={() => onNavigate('list')}
               className="text-slate-500 hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400 transition-colors duration-200 p-2 rounded-full -ml-2"
@@ -35,7 +45,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, selectedSurah, onNavigate,
             >
               <span className="material-symbols-outlined">arrow_back</span>
             </button>
-          )}
+          ) : <Logo />}
           <h1 className={`text-2xl font-bold tracking-wide ${['list', 'detail'].includes(currentView) ? 'font-arabic' : ''} ${['detail', 'settings', 'bookmarks'].includes(currentView) ? 'text-slate-800 dark:text-zinc-200' : 'text-blue-600 dark:text-blue-400'}`}>
             {getTitle()}
           </h1>
