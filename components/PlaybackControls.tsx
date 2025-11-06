@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Surah, PlayingState, LearningModeType } from '../types';
 import { PlayIcon, StopIcon, LoadingSpinner } from './icons/PlaybackIcons';
-import { LearnIcon } from './icons/FeatureIcons';
+import { LearnIcon, RegenerateIcon } from './icons/FeatureIcons';
 import PlaybackSettingsModal from './PlaybackSettingsModal';
 
 interface PlaybackControlsProps {
@@ -16,6 +16,7 @@ interface PlaybackControlsProps {
   onRepeatCountChange: (count: number) => void;
   isInfinite: boolean;
   onIsInfiniteChange: (isInfinite: boolean) => void;
+  onRegenerateRange: () => void;
 }
 
 const PlaybackControls: React.FC<PlaybackControlsProps> = ({ 
@@ -30,6 +31,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     onRepeatCountChange,
     isInfinite,
     onIsInfiniteChange,
+    onRegenerateRange,
  }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -66,6 +68,14 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
                 >
                     {isLoadingContinuous ? <LoadingSpinner/> : <PlayIcon />}
                     <span>{isLoadingContinuous ? 'Generating...' : 'Play Continuous'}</span>
+                </button>
+                <button
+                    onClick={onRegenerateRange}
+                    className="flex items-center justify-center w-full sm:w-auto px-4 py-2 rounded-lg bg-slate-200 text-slate-700 dark:bg-zinc-700 dark:text-zinc-200 font-semibold transition-colors hover:bg-slate-300 dark:hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Regenerate audio for selected range"
+                    disabled={isAnyPlaybackActive}
+                >
+                    <RegenerateIcon />
                 </button>
                  <button
                     onClick={() => setIsSettingsOpen(true)}

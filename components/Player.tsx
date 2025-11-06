@@ -60,8 +60,8 @@ const Player: React.FC<PlayerProps> = ({
     const currentSliderValue = isSeeking.current ? seekValue : elapsedTime;
 
     const totalVersesInRange = modalProps.playbackRange.end - modalProps.playbackRange.start + 1;
-    const isChunkedPlayback = mode === 'full-surah' && totalVersesInRange > 36;
-    const isSeekable = mode === 'full-surah' && !isChunkedPlayback;
+    const isChunkedPlayback = mode === 'full-surah' && totalVersesInRange > 20;
+    const isSeekable = !isChunkedPlayback;
 
 
     const getSubtitle = () => {
@@ -69,7 +69,7 @@ const Player: React.FC<PlayerProps> = ({
             return "Generating audio...";
         }
         if (mode === 'full-surah') {
-            return isChunkedPlayback ? `Continuous Recitation (Chunk ${ayah.id}-${Math.min(ayah.id + 30, modalProps.playbackRange.end)})` : 'Continuous Recitation';
+            return isChunkedPlayback ? `Continuous Recitation (Verses ${ayah.id}-${Math.min(ayah.id + 14, modalProps.playbackRange.end)})` : 'Continuous Recitation';
         }
         return ayah.translation;
     };

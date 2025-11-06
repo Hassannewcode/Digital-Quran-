@@ -176,6 +176,42 @@ const App: React.FC = () => {
     }
   }, [selectedReciterId]);
 
+  const handleRegenerateRange = useCallback(async () => {
+    if (!selectedSurah || !selectedReciter) return;
+
+    const { start, end } = playbackRange;
+    const totalVerses = end - start + 1;
+    const CHUNK_THRESHOLD = 20;
+    const CHUNK_SIZE = 15;
+    const reciterId = selectedReciter.id;
+    const surahId = selectedSurah.id;
+
+    const bismillahSuffix = (surahId !== 9 && start > 1) ? '-with-bismillah' : '';
+
+    const keysToDelete: string[] = [];
+
+    if (totalVerses <= CHUNK_THRESHOLD) {
+      keysToDelete.push(`${reciterId}-${surahId}-${start}-${end}${bismillahSuffix}`);
+    } else {
+      let currentStart = start;
+      while (currentStart <= end) {
+        const currentEnd = Math.min(currentStart + CHUNK_SIZE - 1, end);
+        const isFirstChunk = currentStart === start;
+        const key = `${reciterId}-${surahId}-${currentStart}-${currentEnd}${isFirstChunk ? bismillahSuffix : ''}`;
+        keysToDelete.push(key);
+        currentStart = currentEnd + 1;
+      }
+    }
+    
+    try {
+      await Promise.all(keysToDelete.map(key => deleteCachedAudio(key)));
+      setToastMessage('Cached audio for the selected range will be regenerated on next play.');
+    } catch (error) {
+      console.error('Failed to delete cached audio for range:', error);
+      setToastMessage('Error clearing audio cache for range.');
+    }
+  }, [selectedSurah, playbackRange, selectedReciter]);
+
   // Forward-declare handlePlayRange for mutual recursion with handlePlayAyah
   const handlePlayRangeRef = useRef<((surah: Surah, mode: PlayingMode, isContinuation?: boolean) => void) | null>(null);
 
@@ -352,8 +388,8 @@ const App: React.FC = () => {
             handlePlayAyah(ayahToPlay, surah, mode, cacheKey, isContinuation);
         }
     } else { // 'full-surah' mode
-        const CHUNK_SIZE = 31;
-        const CHUNK_THRESHOLD = 36;
+        const CHUNK_SIZE = 15;
+        const CHUNK_THRESHOLD = 20;
         
         // Rebuild queue for a new session or a loop restart (when queue is empty)
         if (chunkQueueRef.current.length === 0) { 
@@ -363,10 +399,7 @@ const App: React.FC = () => {
             if (isChunkedPlaybackRef.current) {
                 let currentStart = playbackRange.start;
                 while (currentStart <= playbackRange.end) {
-                    const remaining = playbackRange.end - currentStart + 1;
-                    const currentEnd = (remaining <= CHUNK_THRESHOLD) 
-                        ? playbackRange.end 
-                        : currentStart + CHUNK_SIZE - 1;
+                    const currentEnd = Math.min(currentStart + CHUNK_SIZE - 1, playbackRange.end);
                     chunkQueueRef.current.push({ start: currentStart, end: currentEnd });
                     currentStart = currentEnd + 1;
                 }
@@ -555,6 +588,7 @@ const App: React.FC = () => {
                     isInfinite={isInfinite}
                     onIsInfiniteChange={setIsInfinite}
                     onRegenerateAyah={handleRegenerateAyah}
+                    onRegenerateRange={handleRegenerateRange}
                     pitch={pitch}
                     onPitchChange={setPitch}
                     speed={speed}

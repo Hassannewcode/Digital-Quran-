@@ -29,6 +29,7 @@ interface SurahDetailProps {
   isInfinite: boolean;
   onIsInfiniteChange: (isInfinite: boolean) => void;
   onRegenerateAyah: (surahId: number, ayahId: number) => void;
+  onRegenerateRange: () => void;
   pitch: number;
   onPitchChange: (pitch: number) => void;
   speed: number;
@@ -60,6 +61,7 @@ const SurahDetail: React.FC<SurahDetailProps> = ({
     isInfinite,
     onIsInfiniteChange,
     onRegenerateAyah,
+    onRegenerateRange,
     pitch,
     onPitchChange,
     speed,
@@ -119,6 +121,7 @@ const SurahDetail: React.FC<SurahDetailProps> = ({
           onRepeatCountChange={onRepeatCountChange}
           isInfinite={isInfinite}
           onIsInfiniteChange={onIsInfiniteChange}
+          onRegenerateRange={onRegenerateRange}
         />
         
         <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-md divide-y divide-slate-200 dark:divide-zinc-800">
