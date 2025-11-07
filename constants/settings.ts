@@ -1,3 +1,4 @@
+
 import { Reciter, Translation } from '../types';
 import { EN_SAHIH_TRANSLATION } from '../data/en_sahih';
 import { EN_QARAI_TRANSLATION } from '../data/en_qarai';
@@ -90,6 +91,14 @@ export const RECITERS: Reciter[] = [
         stylePrompt: "Recite in a powerful and beautiful Mujawwad style with a male voice, inspired by Sheikh Abdul Basit Abdus-Samad. The delivery should be majestic and emotional, with exceptional breath control and intricate melodic variations (Tarannum):",
         defaultPitch: 1.0,
         defaultSpeed: 1.0,
+    },
+    { 
+        id: 'fenrir-minshawi', 
+        name: 'Male: Murattal (Minshawi Inspired)', 
+        voice: 'Fenrir', 
+        stylePrompt: "Recite with a deep, humble, and melancholic male voice in the Murattal style, profoundly inspired by Sheikh Mohamed Siddiq El-Minshawi. The recitation must be filled with 'huzn' (a beautiful, reverent sadness) and 'khushu' (deep humility), making each word resonate with spiritual weight. The pace should be measured and clear, with meticulous Tajweed, allowing for deep contemplation. The tone must be intensely personal and introspective, as if the reciter is speaking directly to God.",
+        defaultPitch: 0.98,
+        defaultSpeed: 0.95,
     },
     { 
         id: 'puck-warsh', 

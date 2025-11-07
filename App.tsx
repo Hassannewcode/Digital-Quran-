@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Surah, Ayah, PlayingState, Reciter, Translation, Bookmark, Note, PlayingMode, LearningModeType, View } from './types';
 import { getSurahsWithTranslation } from './services/quranService';
@@ -47,7 +48,7 @@ const App: React.FC = () => {
   const [pitch, setPitch] = useLocalStorage('pitch', 1.0);
   const [speed, setSpeed] = useLocalStorage('speed', 1.0);
 
-  const [selectedReciterId, setSelectedReciterId] = useLocalStorage('reciter', 'fenrir-alkazemi');
+  const [selectedReciterId, setSelectedReciterId] = useLocalStorage('reciter', 'fenrir-minshawi');
   const [selectedTranslationId, setSelectedTranslationId] = useLocalStorage('translation', 'none');
   const [bookmarks, setBookmarks] = useLocalStorage<Bookmark[]>('bookmarks', []);
   const [notes, setNotes] = useLocalStorage<Note[]>('notes', []);
