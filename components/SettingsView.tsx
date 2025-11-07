@@ -13,7 +13,7 @@ interface SettingsViewProps {
     onPitchChange: (pitch: number) => void;
     speed: number;
     onSpeedChange: (speed: number) => void;
-    installPrompt: Event | null;
+    installPrompt: BeforeInstallPromptEvent | null;
     handleInstall: () => void;
 }
 
