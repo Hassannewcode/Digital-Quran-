@@ -47,7 +47,7 @@ const App: React.FC = () => {
   const [pitch, setPitch] = useLocalStorage('pitch', 1.0);
   const [speed, setSpeed] = useLocalStorage('speed', 1.0);
 
-  const [selectedReciterId, setSelectedReciterId] = useLocalStorage('reciter', 'fenrir');
+  const [selectedReciterId, setSelectedReciterId] = useLocalStorage('reciter', 'fenrir-alkazemi');
   const [selectedTranslationId, setSelectedTranslationId] = useLocalStorage('translation', 'none');
   const [bookmarks, setBookmarks] = useLocalStorage<Bookmark[]>('bookmarks', []);
   const [notes, setNotes] = useLocalStorage<Note[]>('notes', []);
