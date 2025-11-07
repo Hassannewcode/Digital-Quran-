@@ -52,6 +52,14 @@ export const RECITERS: Reciter[] = [
         defaultSpeed: 1.0,
     },
     { 
+        id: 'fenrir-emotional-reverb',
+        name: 'Male: Emotional Murattal (AI Masterclass)',
+        voice: 'Fenrir',
+        stylePrompt: "Take complete artistic and emotional control to deliver a masterclass recitation in a deeply moving and expressive Murattal style with a male voice. Your delivery must be profoundly heartfelt, guided by the very meaning (Tafsir) of the verses.\n*   **Tafsir-Informed Emotion:** For verses of mercy (Rahmah), adopt a gentle, soothing, and hopeful tone. For verses of warning and divine wrath (Adhab), shift to a more powerful, stern, and cautionary delivery. Let the subject matter dictate the emotion.\n*   **Dynamic Performance:** Utilize a wide dynamic range. Employ dramatic, intelligent volume control, making powerful moments louder and reflective passages softer. The pacing must be fluid and dynamic, never monotonous.\n*   **Vocal Artistry:** Introduce subtle vocal nuances to enhance the human quality. This includes a gentle vibrato (tar'eed) on elongated vowels (madd) and slight, respectful emotional tremors during profoundly impactful verses to convey deep humility (khushu').\n*   **Rhythmic Cadence:** Vary the cadence to match the narrative flow. Accelerate slightly during storytelling passages and slow down significantly for contemplative or climactic verses. Incorporate natural, strategically placed pauses for breath, as a human reciter would, to enhance the rhythm and allow for powerful low and high pitch maneuvers.\n*   **Melodic Influence:** The melody should have a clear Mujawwad influence, using pitch variations to convey deep emotion.\n*   **Immersive Audio:** Maintain perfect Tajweed throughout. Add a subtle, spacious reverb that evokes the acoustics of a grand mosque, creating a sacred and immersive soundscape:",
+        defaultPitch: 1.1,
+        defaultSpeed: 1.20,
+    },
+    { 
         id: 'charon', 
         name: 'Male: Tahqiq (Slow & Meticulous)', 
         voice: 'Charon', 
