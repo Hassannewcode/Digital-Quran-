@@ -56,6 +56,14 @@
       .animate-fade-out-up {
         animation: fadeOutUp 2s ease-in-out forwards;
       }
+      
+      @keyframes slideUp {
+        from { transform: translateY(100%); }
+        to { transform: translateY(0); }
+      }
+      .animate-slide-up {
+        animation: slideUp 0.5s ease-out forwards;
+      }
 
       /* Learning Mode Word Highlighting */
       .highlight-pending {

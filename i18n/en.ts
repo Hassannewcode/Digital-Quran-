@@ -31,11 +31,10 @@ export const en = {
     "install_app": "Install App",
     "install_prompt_desc": "For the best experience, install the Quranic Reciter on your device. This enables offline access and a native app feel.",
     "install_app_aria": "Install Quranic Reciter app",
-    "install_manual_title": "App Installed or Manual Installation Required",
-    "install_manual_desc": "This app can be added to your home screen for a native experience.",
-    "install_manual_chrome": "Chrome/Edge: Look for an \"Install\" icon in the address bar, or check your browser's menu.",
-    "install_manual_safari": "Safari (iOS): Tap the \"Share\" button, then scroll down and select \"Add to Home Screen\".",
-    "install_manual_android": "Android: Your browser should prompt you to install, or you can find \"Add to Home Screen\" in the browser menu.",
+    "app_installed_or_unsupported": "App is already installed, not supported by your browser, or the install prompt was dismissed.",
+    "install_banner_text": "Get the full app experience. Install Quranic Reciter on your device.",
+    "install_button": "Install",
+    "dismiss_button_aria": "Dismiss install banner",
     "recitation_styles_title": "Recitation Styles: Mujawwad vs. Murattal",
     "recitation_styles_desc": "The Holy Quran can be recited in several styles, each with its own unique characteristics and purpose. Two of the most prominent styles are Mujawwad and Murattal. Understanding their differences can enrich your listening experience.",
     "feature": "Feature",
@@ -65,4 +64,3 @@ export const en = {
     "sources_desc": "This project would not be possible without the incredible work of many organizations dedicated to serving the Holy Quran. We are inspired by and grateful for their efforts:",
     "language": "Language"
   };
-  

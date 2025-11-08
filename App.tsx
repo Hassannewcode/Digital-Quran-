@@ -16,6 +16,7 @@ import { useTheme } from './hooks/useTheme';
 import { usePwaInstall } from './hooks/usePwaInstall';
 import { RECITERS, TRANSLATIONS } from './constants/settings';
 import Toast from './components/Toast';
+import { useLanguage } from './hooks/useLanguage';
 
 const App: React.FC = () => {
   const [view, setView] = useState<View>('list');
@@ -30,7 +31,9 @@ const App: React.FC = () => {
   const [isAutoScrollEnabled, setIsAutoScrollEnabled] = useLocalStorage('autoScroll', true);
   
   const { installPrompt, handleInstall } = usePwaInstall();
+  const [isInstallBannerDismissed, setIsInstallBannerDismissed] = useLocalStorage('installBannerDismissed', false);
   const [themeSetting, setThemeSetting] = useTheme();
+  const { t } = useLanguage();
 
   const [playbackRange, setPlaybackRange] = useState<{ start: number; end: number }>({ start: 1, end: 1 });
   const [repeatCount, setRepeatCount] = useState(0); // 0 = off
@@ -66,6 +69,17 @@ const App: React.FC = () => {
   const selectedTranslation = useMemo(() => TRANSLATIONS.find(t => t.id === selectedTranslationId), [selectedTranslationId]);
   const selectedReciter = useMemo(() => RECITERS.find(r => r.id === selectedReciterId), [selectedReciterId]);
   
+  useEffect(() => {
+    // This will run once on component mount to set initial view from URL shortcuts
+    const params = new URLSearchParams(window.location.search);
+    const viewFromUrl = params.get('view') as View;
+    if (viewFromUrl && ['list', 'bookmarks', 'settings'].includes(viewFromUrl)) {
+        setView(viewFromUrl);
+        // Clean the URL to not interfere with back button navigation
+        window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
+
   useEffect(() => {
     if (selectedReciter) {
         setPitch(selectedReciter.defaultPitch ?? 1.0);
@@ -645,7 +659,11 @@ const App: React.FC = () => {
     }
   }
   
-  const mainContentPadding = playingState.status !== 'idle' ? 'pb-40' : 'pb-8';
+  const showInstallBanner = installPrompt && !isInstallBannerDismissed && playingState.status === 'idle';
+  const dismissInstallBanner = () => setIsInstallBannerDismissed(true);
+
+  const mainContentPadding = playingState.status !== 'idle' ? 'pb-40' : (showInstallBanner ? 'pb-28' : 'pb-8');
+
 
   return (
     <div className="min-h-screen">
@@ -665,6 +683,18 @@ const App: React.FC = () => {
           session={learningSession}
           onClose={() => setLearningSession(null)}
         />
+      )}
+      {showInstallBanner && (
+        <div className="fixed bottom-0 left-0 right-0 bg-slate-800 dark:bg-zinc-800 text-white p-3 sm:p-4 z-30 flex items-center justify-center gap-2 sm:gap-4 animate-slide-up shadow-lg">
+          <span className="material-symbols-outlined hidden sm:inline">install_desktop</span>
+          <p className="text-sm sm:text-base text-center">{t('install_banner_text')}</p>
+          <div className="flex gap-2 flex-shrink-0">
+            <button onClick={handleInstall} className="px-3 sm:px-4 py-2 bg-blue-600 rounded-md font-semibold hover:bg-blue-700 text-sm">{t('install_button')}</button>
+            <button onClick={dismissInstallBanner} className="p-2 rounded-md hover:bg-slate-700" aria-label={t('dismiss_button_aria')}>
+                <span className="material-symbols-outlined">close</span>
+            </button>
+          </div>
+        </div>
       )}
       <footer className="text-center py-6 text-slate-500 dark:text-zinc-500 text-sm">
         <p>Quranic Reciter - Experience the Holy Quran with AI-powered recitation.</p>

@@ -2,7 +2,7 @@
   "name": "Quranic Reciter",
   "short_name": "Quran",
   "description": "An elegant web application to read and listen to the Holy Quran. Each verse can be recited using advanced Text-to-Speech technology, providing a beautiful and accessible experience.",
-  "start_url": "/",
+  "start_url": "/?view=list",
   "scope": "/",
   "display_override": ["window-controls-overlay", "standalone"],
   "display": "standalone",
@@ -14,6 +14,18 @@
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "View Bookmarks",
+      "url": "/?view=bookmarks",
+      "description": "Access your bookmarked verses"
+    },
+    {
+      "name": "Settings & About",
+      "url": "/?view=settings",
+      "description": "Change app settings and learn about the app"
     }
   ]
 }

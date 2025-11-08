@@ -99,14 +99,8 @@ const SettingsView: React.FC<SettingsViewProps> = ({ installPrompt, handleInstal
               </button>
             </div>
           ) : (
-             <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-l-4 rtl:border-l-0 rtl:border-r-4 border-blue-500 rounded-r-lg rtl:rounded-r-none rtl:rounded-l-lg text-blue-800 dark:text-blue-300 text-sm">
-                 <p className="font-semibold">{t('install_manual_title')}</p>
-                 <p className="mt-1">{t('install_manual_desc')}</p>
-                 <ul className="list-disc list-inside mt-2 space-y-1">
-                    <li><strong>{t('install_manual_chrome')}</strong></li>
-                    <li><strong>{t('install_manual_safari')}</strong></li>
-                    <li><strong>{t('install_manual_android')}</strong></li>
-                 </ul>
+             <div className="p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 text-sm rounded-lg text-center">
+                <p>{t('app_installed_or_unsupported')}</p>
               </div>
           )}
         </div>
@@ -221,7 +215,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({ installPrompt, handleInstal
                             href={link.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium hover:underline flex items-center gap-2"
+                            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium flex items-center gap-2"
                         >
                             <span>{link.name}</span>
                             <span className="material-symbols-outlined text-sm">open_in_new</span>
