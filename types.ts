@@ -2,6 +2,7 @@ export interface Ayah {
   id: number;
   text: string;
   translation?: string;
+  transliteration?: string;
 }
 
 export interface Surah {

@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from 'react';
 import { Ayah, PlayingState, Surah } from '../types';
 import { LoadingSpinner, PlayIcon, StopIcon, ErrorIcon } from './icons/PlaybackIcons';
@@ -62,6 +60,9 @@ const AyahView: React.FC<AyahViewProps> = ({
 
   const createShareText = () => {
     let text = `Surah ${surah.name} (${surah.id}:${ayah.id})\n\n"${ayah.text}"`;
+    if (ayah.transliteration) {
+        text += `\n\n${ayah.transliteration}`;
+    }
     if (ayah.translation) {
         text += `\n\n${ayah.translation}`;
     }
@@ -180,12 +181,17 @@ const AyahView: React.FC<AyahViewProps> = ({
                 </button>
             </div>
             <div className="flex-1">
-                <p dir="rtl" className="text-3xl md:text-4xl font-amiri-quran text-right text-slate-900 dark:text-zinc-100 mb-4" style={{ lineHeight: 2.8 }}>
+                <p dir="rtl" className="text-3xl md:text-4xl font-amiri-quran text-right text-slate-900 dark:text-zinc-100 mb-2" style={{ lineHeight: 2.8 }}>
                     {ayah.text}
                      <span className="text-2xl font-amiri-quran select-none text-blue-500 dark:text-blue-400 mx-2">﴿{ayah.id.toLocaleString('ar')}﴾</span>
                 </p>
+                {ayah.transliteration && (
+                    <p dir="ltr" className="text-slate-500 dark:text-zinc-500 text-base text-right font-sans leading-relaxed mb-4">
+                        {ayah.transliteration}
+                    </p>
+                )}
                 {ayah.translation && (
-                    <p dir="ltr" className="text-slate-600 dark:text-zinc-400 text-left leading-relaxed">
+                    <p dir="ltr" className="text-slate-600 dark:text-zinc-400 text-left rtl:text-right leading-relaxed">
                         {ayah.translation}
                     </p>
                 )}

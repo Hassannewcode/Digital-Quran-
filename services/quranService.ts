@@ -1,6 +1,7 @@
 import { Surah, Ayah } from '../types';
 import { SURAH_METADATA } from '../constants/surahNames';
 import { QURAN_TEXT_TANZIL as QURAN_TEXT } from '../Quran';
+import { QURAN_TRANSLITERATION } from '../data/en_buckwalter';
 
 let arabicSurahs: Surah[] | null = null;
 const surahCache: { [key: string]: Surah[] } = {};
@@ -8,6 +9,15 @@ const surahCache: { [key: string]: Surah[] } = {};
 function parseQuran(): Surah[] {
   if (arabicSurahs) {
     return arabicSurahs;
+  }
+
+  const transliterationMap = new Map<string, string>();
+  const translitLines = QURAN_TRANSLITERATION.split('\n').filter(line => line.trim() !== '' && !line.startsWith('#'));
+  for (const line of translitLines) {
+    const parts = line.split('|');
+    if (parts.length === 3) {
+      transliterationMap.set(`${parts[0]}|${parts[1]}`, parts[2].trim());
+    }
   }
 
   const surahsMap: Map<number, Surah> = new Map();
@@ -19,6 +29,7 @@ function parseQuran(): Surah[] {
       const surahId = parseInt(parts[0], 10);
       const ayahId = parseInt(parts[1], 10);
       const text = parts[2].trim();
+      const transliteration = transliterationMap.get(`${surahId}|${ayahId}`);
 
       if (!surahsMap.has(surahId)) {
         const surahMeta = SURAH_METADATA[surahId - 1];
@@ -34,7 +45,7 @@ function parseQuran(): Surah[] {
       
       const currentSurah = surahsMap.get(surahId);
       if(currentSurah) {
-        currentSurah.ayahs.push({ id: ayahId, text });
+        currentSurah.ayahs.push({ id: ayahId, text, transliteration });
       }
     }
   }
@@ -53,6 +64,8 @@ export function getSurahsWithTranslation(translationData: Record<string, Record<
     const baseSurahs = parseQuran();
     
     if (!translationData) {
+        // PERF: Avoid re-mapping if transliteration is already present and no translation is needed.
+        // Also, ensure `translation` property is explicitly set to undefined for consistent object shape.
         const result = baseSurahs.map(surah => ({ ...surah, ayahs: surah.ayahs.map(ayah => ({...ayah, translation: undefined})) }));
         surahCache[cacheKey] = result;
         return result;

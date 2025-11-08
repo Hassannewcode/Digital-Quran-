@@ -13,6 +13,7 @@ const urlsToCache = [
   '/constants/settings.ts',
   '/data/en_qarai.ts',
   '/data/en_sahih.ts',
+  '/data/en_buckwalter.ts',
   '/services/quranService.ts',
   '/services/geminiService.ts',
   '/services/dbService.ts',
