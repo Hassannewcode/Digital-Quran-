@@ -1,10 +1,12 @@
-const CACHE_NAME = 'quranic-reciter-v8';
+const CACHE_NAME = 'quranic-reciter-v9';
 // Add all essential app shell and core script files to the cache list.
 // This ensures the app can load and function fully offline after the first visit.
 const urlsToCache = [
   '/',
   '/index.html',
   '/manifest.json',
+  '/icons/icon-192.svg',
+  '/icons/icon-512.svg',
   '/index.tsx',
   '/App.tsx',
   '/types.ts',

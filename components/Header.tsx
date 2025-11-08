@@ -13,8 +13,9 @@ interface HeaderProps {
 const Logo = () => (
     <svg width="28" height="28" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <rect width="64" height="64" rx="12" fill="#3B82F6"/>
-        <path fill="white" d="M30,52 C30,58, 12,52, 12,52 V12 C12,6, 30,12, 30,12 V52 Z" />
-        <path fill="white" d="M34,52 C34,58, 52,52, 52,52 V12 C52,6, 34,12, 34,12 V52 Z" />
+        <path d="M32 12C22 12 15 18 15 28V52H32V12Z" fill="white"/>
+        <path d="M32 12C42 12 49 18 49 28V52H32V12Z" fill="white"/>
+        <line x1="32" y1="14" x2="32" y2="52" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round"/>
     </svg>
 );
 
