@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Surah, Ayah, PlayingState, Note, Reciter, Translation, PlayingMode, LearningModeType } from '../types';
 import AyahView from './AyahView';
 import PlaybackControls from './PlaybackControls';
 import SettingsPanel from './SettingsPanel';
 import { useLanguage } from '../hooks/useLanguage';
+import AyahSkeleton from './AyahSkeleton';
 
 interface SurahDetailProps {
   surah: Surah;
@@ -35,6 +36,7 @@ interface SurahDetailProps {
   onPitchChange: (pitch: number) => void;
   speed: number;
   onSpeedChange: (speed: number) => void;
+  onShowToast: (message: string) => void;
 }
 
 const SurahDetail: React.FC<SurahDetailProps> = ({ 
@@ -67,8 +69,19 @@ const SurahDetail: React.FC<SurahDetailProps> = ({
     onPitchChange,
     speed,
     onSpeedChange,
+    onShowToast,
 }) => {
   const { t } = useLanguage();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // When the surah changes, show the skeleton loader briefly.
+    // This improves the perceived performance by providing immediate feedback.
+    setIsLoading(true);
+    const timer = setTimeout(() => setIsLoading(false), 250); // A small delay to ensure skeletons render
+    return () => clearTimeout(timer);
+  }, [surah.id]);
+
   const surahNotes = notes
     .filter(note => note.surahId === surah.id)
     .sort((a, b) => a.ayahId - b.ayahId);
@@ -127,41 +140,48 @@ const SurahDetail: React.FC<SurahDetailProps> = ({
         />
         
         <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-md divide-y divide-slate-200 dark:divide-zinc-800">
-          {surah.id !== 1 && surah.id !== 9 && (
+          {surah.id !== 1 && surah.id !== 9 && !isLoading && (
             <div className="p-4 md:p-6">
                 <p className="text-center text-2xl font-amiri-quran text-slate-700 dark:text-zinc-300">
                 بِسْمِ اللَّهِ الرَّحْمَـٰنِ الرَّحِيمِ
                 </p>
             </div>
           )}
-          {surah.ayahs.map((ayah) => {
-            let isHighlighted = false;
-             if (playingState.status !== 'idle' && playingState.surahId === surah.id) {
-                if (playingState.mode === 'single' || playingState.mode === 'verse-by-verse') {
-                    isHighlighted = playingState.ayahId === ayah.id;
-                } else if (playingState.mode === 'full-surah') {
-                    isHighlighted = ayah.id >= playbackRange.start && ayah.id <= playbackRange.end;
-                }
-            }
-
-            return (
-                <AyahView
-                    key={ayah.id}
-                    ayah={ayah}
-                    surah={surah}
-                    onPlay={() => onPlay(ayah)}
-                    onStop={onStop}
-                    onStartLearning={() => onStartLearning(surah, {start: ayah.id, end: ayah.id}, 'highlight')}
-                    playingState={playingState}
-                    isBookmarked={isBookmarked(surah.id, ayah.id)}
-                    note={getNoteForAyah(surah.id, ayah.id)}
-                    onToggleBookmark={() => onToggleBookmark(surah.id, ayah.id)}
-                    onSaveNote={(text) => onSaveNote(surah.id, ayah.id, text)}
-                    onRegenerate={() => onRegenerateAyah(surah.id, ayah.id)}
-                    isHighlighted={isHighlighted}
-                />
+           {isLoading 
+            ? (
+              Array.from({ length: 5 }).map((_, index) => <AyahSkeleton key={index} />)
             )
-          })}
+            : (
+              surah.ayahs.map((ayah) => {
+                let isHighlighted = false;
+                 if (playingState.status !== 'idle' && playingState.surahId === surah.id) {
+                    if (playingState.mode === 'single' || playingState.mode === 'verse-by-verse') {
+                        isHighlighted = playingState.ayahId === ayah.id;
+                    } else if (playingState.mode === 'full-surah') {
+                        isHighlighted = ayah.id >= playbackRange.start && ayah.id <= playbackRange.end;
+                    }
+                }
+
+                return (
+                    <AyahView
+                        key={ayah.id}
+                        ayah={ayah}
+                        surah={surah}
+                        onPlay={() => onPlay(ayah)}
+                        onStop={onStop}
+                        onStartLearning={() => onStartLearning(surah, {start: ayah.id, end: ayah.id}, 'highlight')}
+                        playingState={playingState}
+                        isBookmarked={isBookmarked(surah.id, ayah.id)}
+                        note={getNoteForAyah(surah.id, ayah.id)}
+                        onToggleBookmark={() => onToggleBookmark(surah.id, ayah.id)}
+                        onSaveNote={(text) => onSaveNote(surah.id, ayah.id, text)}
+                        onRegenerate={() => onRegenerateAyah(surah.id, ayah.id)}
+                        isHighlighted={isHighlighted}
+                        onShowToast={onShowToast}
+                    />
+                )
+              })
+            )}
         </div>
       </div>
     </div>

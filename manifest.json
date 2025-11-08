@@ -1,13 +1,18 @@
 {
   "name": "Quranic Reciter",
   "short_name": "Quran",
+  "id": "/",
   "description": "An elegant web application to read and listen to the Holy Quran. Each verse can be recited using advanced Text-to-Speech technology, providing a beautiful and accessible experience.",
-  "start_url": "/?view=list",
+  "start_url": "/",
   "scope": "/",
-  "display_override": ["window-controls-overlay", "standalone"],
   "display": "standalone",
   "background_color": "#f1f5f9",
   "theme_color": "#ffffff",
+  "categories": [
+    "books",
+    "education",
+    "lifestyle"
+  ],
   "icons": [
     {
       "src": "data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3e%3crect width='64' height='64' rx='12' fill='%233B82F6'/%3e%3cpath fill='white' d='M30,52 C30,58, 12,52, 12,52 V12 C12,6, 30,12, 30,12 V52 Z' /%3e%3cpath fill='white' d='M34,52 C34,58, 52,52, 52,52 V12 C52,6, 34,12, 34,12 V52 Z' /%3e%3c/svg%3e",

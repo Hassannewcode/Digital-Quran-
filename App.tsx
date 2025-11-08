@@ -638,6 +638,7 @@ const App: React.FC = () => {
                     onPitchChange={setPitch}
                     speed={speed}
                     onSpeedChange={setSpeed}
+                    onShowToast={setToastMessage}
                 />
             ) : <SurahList surahs={surahs} onSelect={handleSelectSurah} />;
         case 'bookmarks':

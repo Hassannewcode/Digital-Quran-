@@ -1,8 +1,9 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { Ayah, PlayingState, Surah } from '../types';
 import { LoadingSpinner, PlayIcon, StopIcon, ErrorIcon } from './icons/PlaybackIcons';
-import { BookmarkIcon, NoteIcon, RegenerateIcon, LearnIcon } from './icons/FeatureIcons';
+import { BookmarkIcon, NoteIcon, RegenerateIcon, LearnIcon, CopyIcon, ShareIcon } from './icons/FeatureIcons';
 
 interface AyahViewProps {
   ayah: Ayah;
@@ -17,6 +18,7 @@ interface AyahViewProps {
   onSaveNote: (text: string) => void;
   onRegenerate: () => void;
   isHighlighted: boolean;
+  onShowToast: (message: string) => void;
 }
 
 const AyahView: React.FC<AyahViewProps> = ({ 
@@ -31,7 +33,8 @@ const AyahView: React.FC<AyahViewProps> = ({
     onToggleBookmark, 
     onSaveNote, 
     onRegenerate,
-    isHighlighted
+    isHighlighted,
+    onShowToast,
 }) => {
   const [showNote, setShowNote] = useState(false);
   const [noteText, setNoteText] = useState(note);
@@ -56,6 +59,39 @@ const AyahView: React.FC<AyahViewProps> = ({
     onStop(); // Stop any playback before starting learning mode
     onStartLearning();
   }
+
+  const createShareText = () => {
+    let text = `Surah ${surah.name} (${surah.id}:${ayah.id})\n\n"${ayah.text}"`;
+    if (ayah.translation) {
+        text += `\n\n${ayah.translation}`;
+    }
+    return text;
+  };
+
+  const handleShare = async () => {
+      if (navigator.share) {
+          try {
+              await navigator.share({
+                  title: `Quran - Surah ${surah.name} (${surah.id}:${ayah.id})`,
+                  text: createShareText(),
+                  url: window.location.href,
+              });
+          } catch (error) {
+              console.error('Error sharing:', error);
+              onShowToast('Could not share verse.');
+          }
+      }
+  };
+
+  const handleCopy = async () => {
+      try {
+          await navigator.clipboard.writeText(createShareText());
+          onShowToast('Verse copied to clipboard!');
+      } catch (error) {
+          console.error('Error copying text:', error);
+          onShowToast('Could not copy verse.');
+      }
+  };
 
   const renderPlayButton = () => {
     if (isPlayingOrLoadingThisAyah) {
@@ -102,6 +138,24 @@ const AyahView: React.FC<AyahViewProps> = ({
                 >
                     <LearnIcon />
                 </button>
+                <button
+                    onClick={handleCopy}
+                    className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors duration-200 text-zinc-400 hover:text-blue-600 hover:bg-slate-200 dark:text-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-blue-400`}
+                    aria-label={`Copy Ayah ${surah.id}:${ayah.id}`}
+                    title="Copy verse"
+                >
+                    <CopyIcon />
+                </button>
+                {navigator.share && (
+                    <button
+                        onClick={handleShare}
+                        className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors duration-200 text-zinc-400 hover:text-blue-600 hover:bg-slate-200 dark:text-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-blue-400`}
+                        aria-label={`Share Ayah ${surah.id}:${ayah.id}`}
+                        title="Share verse"
+                    >
+                        <ShareIcon />
+                    </button>
+                )}
                  <div className="relative">
                     <button 
                         onClick={() => setShowNote(!showNote)}

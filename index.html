@@ -65,6 +65,25 @@
         animation: slideUp 0.5s ease-out forwards;
       }
 
+      /* Shimmer effect for skeleton loaders */
+      @keyframes shimmer {
+        0% {
+          background-position: -1000px 0;
+        }
+        100% {
+          background-position: 1000px 0;
+        }
+      }
+      .shimmer-bg {
+        animation: shimmer 2s infinite linear;
+        background: linear-gradient(to right, #e5e7eb 4%, #d1d5db 25%, #e5e7eb 36%);
+        background-size: 2000px 100%;
+      }
+      .dark .shimmer-bg {
+        background: linear-gradient(to right, #3f3f46 4%, #52525b 25%, #3f3f46 36%);
+        background-size: 2000px 100%;
+      }
+
       /* Learning Mode Word Highlighting */
       .highlight-pending {
         color: inherit;

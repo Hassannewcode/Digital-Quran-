@@ -31,3 +31,11 @@ export const LearnIcon: React.FC = () => (
 export const MicrophoneIcon: React.FC = () => (
     <span className="material-symbols-outlined">mic</span>
 );
+
+export const CopyIcon: React.FC = () => (
+    <span className="material-symbols-outlined">content_copy</span>
+);
+
+export const ShareIcon: React.FC = () => (
+    <span className="material-symbols-outlined">share</span>
+);
