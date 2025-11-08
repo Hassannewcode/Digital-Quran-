@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Surah } from '../types';
 import { CloseIcon } from './icons/PlaybackIcons';
 
@@ -29,6 +29,9 @@ const PlaybackSettingsModal: React.FC<PlaybackSettingsModalProps> = ({
   const [endInput, setEndInput] = useState(playbackRange.end.toString());
   const [repeatInput, setRepeatInput] = useState(repeatCount.toString());
   const [isInfiniteChecked, setIsInfiniteChecked] = useState(isInfinite);
+  
+  const modalRef = useRef<HTMLDivElement>(null);
+  const triggerElementRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -38,6 +41,46 @@ const PlaybackSettingsModal: React.FC<PlaybackSettingsModalProps> = ({
         setRepeatInput(isInfinite ? '0' : repeatCount.toString());
     }
   }, [isOpen, playbackRange, repeatCount, isInfinite]);
+
+  // Focus trap for accessibility
+  useEffect(() => {
+    if (isOpen) {
+      triggerElementRef.current = document.activeElement as HTMLElement;
+      const focusableElements = modalRef.current?.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusableElements || focusableElements.length === 0) return;
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+      
+      firstElement.focus();
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key !== 'Tab') return;
+
+        if (e.shiftKey) { // shift + tab
+          if (document.activeElement === firstElement) {
+            lastElement.focus();
+            e.preventDefault();
+          }
+        } else { // tab
+          if (document.activeElement === lastElement) {
+            firstElement.focus();
+            e.preventDefault();
+          }
+        }
+      };
+
+      const modal = modalRef.current;
+      modal?.addEventListener('keydown', handleKeyDown);
+
+      return () => {
+        modal?.removeEventListener('keydown', handleKeyDown);
+        triggerElementRef.current?.focus();
+      };
+    }
+  }, [isOpen]);
 
   const applyChanges = useCallback(() => {
     let start = parseInt(startInput, 10);
@@ -79,14 +122,16 @@ const PlaybackSettingsModal: React.FC<PlaybackSettingsModalProps> = ({
         onClick={handleClose}
         aria-modal="true"
         role="dialog"
+        aria-labelledby="playback-settings-title"
     >
       <div 
+        ref={modalRef}
         className="bg-white dark:bg-zinc-800 rounded-lg shadow-xl p-6 w-full max-w-md"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-slate-800 dark:text-zinc-200">Playback Settings</h2>
-          <button onClick={handleClose} className="p-1 rounded-full hover:bg-slate-200 dark:hover:bg-zinc-700">
+          <h2 id="playback-settings-title" className="text-xl font-bold text-slate-800 dark:text-zinc-200">Playback Settings</h2>
+          <button onClick={handleClose} className="p-1 rounded-full hover:bg-slate-200 dark:hover:bg-zinc-700" aria-label="Close settings">
             <CloseIcon />
           </button>
         </div>

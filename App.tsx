@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Surah, Ayah, PlayingState, Reciter, Translation, Bookmark, Note, PlayingMode, LearningModeType, View } from './types';
+import { Surah, Ayah, PlayingState, Bookmark, Note, PlayingMode, LearningModeType, View, LearningSession } from './types';
 import { getSurahsWithTranslation } from './services/quranService';
 import { generateSpeech } from './services/geminiService';
 import { getCachedAudio, setCachedAudio, deleteCachedAudio } from './services/dbService';
@@ -18,12 +17,6 @@ import { usePwaInstall } from './hooks/usePwaInstall';
 import { RECITERS, TRANSLATIONS } from './constants/settings';
 import Toast from './components/Toast';
 
-type LearningSession = {
-  surah: Surah;
-  range: { start: number; end: number };
-  mode: LearningModeType;
-};
-
 const App: React.FC = () => {
   const [view, setView] = useState<View>('list');
   const [surahs, setSurahs] = useState<Surah[]>([]);
@@ -33,9 +26,11 @@ const App: React.FC = () => {
   const [currentAyah, setCurrentAyah] = useState<Ayah | null>(null);
   const [toastMessage, setToastMessage] = useState<string>('');
   const [learningSession, setLearningSession] = useState<LearningSession | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isAutoScrollEnabled, setIsAutoScrollEnabled] = useLocalStorage('autoScroll', true);
   
   const { installPrompt, handleInstall } = usePwaInstall();
-  const [theme, toggleTheme] = useTheme();
+  const [themeSetting, setThemeSetting] = useTheme();
 
   const [playbackRange, setPlaybackRange] = useState<{ start: number; end: number }>({ start: 1, end: 1 });
   const [repeatCount, setRepeatCount] = useState(0); // 0 = off
@@ -62,6 +57,7 @@ const App: React.FC = () => {
   const elapsedTimeIntervalRef = useRef<number | null>(null);
   const playbackStartTimeRef = useRef(0);
   const pauseTimeRef = useRef(0);
+  const lastScrolledAyahId = useRef<string | null>(null);
 
   // Refs for managing chunked playback
   const chunkQueueRef = useRef<Array<{start: number, end: number}>>([]);
@@ -110,6 +106,26 @@ const App: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [toastMessage]);
+  
+  useEffect(() => {
+    if (isAutoScrollEnabled && playingState.status !== 'idle' && view === 'detail' && selectedSurah?.id === playingState.surahId) {
+        const ayahId = playingState.ayahId;
+        const elementId = `ayah-${playingState.surahId}-${ayahId}`;
+
+        // Only scroll if the ayah has changed
+        if (elementId !== lastScrolledAyahId.current) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+                lastScrolledAyahId.current = elementId;
+            }
+        }
+    }
+  }, [playingState, isAutoScrollEnabled, view, selectedSurah]);
+
 
   const stopElapsedTimer = useCallback(() => {
       if (elapsedTimeIntervalRef.current) {
@@ -439,15 +455,17 @@ const App: React.FC = () => {
   handlePlayRangeRef.current = handlePlayRange;
 
   const handleSelectSurah = (surah: Surah) => {
-    stopPlayback();
+    // Do not stop playback, allow it to continue.
     setSelectedSurah(surah);
     setPlaybackRange({ start: 1, end: surah.ayahs.length });
     setView('detail');
+    setSearchQuery(''); // Clear search on navigation
+    lastScrolledAyahId.current = null; // Reset scroll tracking
     window.scrollTo(0, 0);
   };
 
   const handleNavigate = (newView: View) => {
-    stopPlayback();
+    // Do not stop playback.
     if (newView === 'list') {
       setSelectedSurah(null);
     }
@@ -553,6 +571,18 @@ const App: React.FC = () => {
     setLearningSession({ surah, range, mode });
   };
 
+  const filteredSurahs = useMemo(() => {
+    if (!searchQuery) {
+      return surahs;
+    }
+    const lowercasedQuery = searchQuery.toLowerCase().trim();
+    return surahs.filter(
+      (surah) =>
+        surah.name.toLowerCase().includes(lowercasedQuery) ||
+        surah.id.toString() === lowercasedQuery
+    );
+  }, [surahs, searchQuery]);
+
 
   const renderContent = () => {
     switch(view) {
@@ -604,22 +634,14 @@ const App: React.FC = () => {
             />;
         case 'settings':
             return <SettingsView
-                reciters={RECITERS}
-                translations={TRANSLATIONS}
-                selectedReciterId={selectedReciterId}
-                selectedTranslationId={selectedTranslationId}
-                onReciterChange={setSelectedReciterId}
-                onTranslationChange={setSelectedTranslationId}
-                pitch={pitch}
-                onPitchChange={setPitch}
-                speed={speed}
-                onSpeedChange={setSpeed}
                 installPrompt={installPrompt}
                 handleInstall={handleInstall}
+                themeSetting={themeSetting}
+                setThemeSetting={setThemeSetting}
             />;
         case 'list':
         default:
-            return <SurahList surahs={surahs} onSelect={handleSelectSurah} />;
+            return <SurahList surahs={filteredSurahs} onSelect={handleSelectSurah} />;
     }
   }
   
@@ -631,8 +653,8 @@ const App: React.FC = () => {
         currentView={view} 
         selectedSurah={selectedSurah} 
         onNavigate={handleNavigate}
-        theme={theme}
-        onThemeToggle={toggleTheme} 
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
       />
       <main className={`container mx-auto px-4 py-8 ${mainContentPadding}`}>
         {renderContent()}
@@ -669,6 +691,8 @@ const App: React.FC = () => {
           onRepeatCountChange={setRepeatCount}
           isInfinite={isInfinite}
           onIsInfiniteChange={setIsInfinite}
+          isAutoScrollEnabled={isAutoScrollEnabled}
+          onToggleAutoScroll={() => setIsAutoScrollEnabled(prev => !prev)}
         />
       )}
     </div>

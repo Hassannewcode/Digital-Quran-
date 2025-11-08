@@ -1,18 +1,61 @@
-const CACHE_NAME = 'quranic-reciter-v5';
+const CACHE_NAME = 'quranic-reciter-v8';
+// Add all essential app shell and core script files to the cache list.
+// This ensures the app can load and function fully offline after the first visit.
 const urlsToCache = [
   '/',
   '/index.html',
   '/manifest.json',
+  '/index.tsx',
+  '/App.tsx',
+  '/types.ts',
+  '/Quran.tsx',
+  '/constants/surahNames.ts',
+  '/constants/settings.ts',
+  '/data/en_qarai.ts',
+  '/data/en_sahih.ts',
+  '/services/quranService.ts',
+  '/services/geminiService.ts',
+  '/services/dbService.ts',
+  '/utils/audioUtils.ts',
+  '/utils/textComparison.ts',
+  '/hooks/useLocalStorage.ts',
+  '/hooks/useTheme.ts',
+  '/hooks/usePwaInstall.ts',
+  '/hooks/useSpeechRecognition.ts',
+  '/hooks/useLanguage.ts',
+  '/context/LanguageContext.tsx',
+  '/i18n/en.ts',
+  '/i18n/ar.ts',
+  '/i18n/locales.ts',
+  // Components
+  '/components/Header.tsx',
+  '/components/SurahList.tsx',
+  '/components/SurahDetail.tsx',
+  '/components/BookmarksView.tsx',
+  '/components/SettingsView.tsx',
+  '/components/Player.tsx',
+  '/components/AyahView.tsx',
+  '/components/PlaybackControls.tsx',
+  '/components/PlaybackSettingsModal.tsx',
+  '/components/SettingsPanel.tsx',
+  '/components/Toast.tsx',
+  '/components/learning/RecitationPractice.tsx',
+  '/components/icons/FeatureIcons.tsx',
+  '/components/icons/PlaybackIcons.tsx',
+  // External assets
   'https://cdn.tailwindcss.com',
   'https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap',
   'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0'
 ];
+
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('Opened cache');
+        // Use addAll to fetch and cache all the specified resources.
+        // It's an atomic operation - if any file fails, the entire install step fails.
         return cache.addAll(urlsToCache);
       })
   );
@@ -26,6 +69,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Use a cache-first strategy
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
@@ -34,10 +78,11 @@ self.addEventListener('fetch', (event) => {
           return response;
         }
 
+        // Not in cache - fetch from network, then cache it for next time
         return fetch(event.request).then(
           (response) => {
-            // Check if we received a valid response to prevent caching errors or opaque responses
-            if (!response || response.status !== 200 || response.type !== 'basic') {
+            // Check if we received a valid response
+            if (!response || response.status !== 200 || (response.type !== 'basic' && response.type !== 'cors')) {
               return response;
             }
 

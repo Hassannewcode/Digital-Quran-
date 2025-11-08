@@ -19,13 +19,11 @@ export type View = 'list' | 'detail' | 'bookmarks' | 'settings';
 export type PlayingState = {
     status: 'idle';
 } | {
-    // Fix: Made PlayingState a proper discriminated union by ensuring 'idle' status is only in one part of the union.
     status: 'loading' | 'playing' | 'paused' | 'error';
     surahId: number;
-    ayahId: number; // For single/verse-by-verse: current ayah. For range modes: start ayah of range/chunk.
+    ayahId: number;
     mode: PlayingMode;
 };
-
 
 export interface Reciter {
     id: string;
@@ -52,4 +50,14 @@ export interface Note {
     surahId: number;
     ayahId: number;
     text: string;
+};
+
+export type ThemeSetting = 'system' | 'light' | 'dark';
+
+export type Language = 'en' | 'ar';
+
+export type LearningSession = {
+  surah: Surah;
+  range: { start: number; end: number };
+  mode: LearningModeType;
 };

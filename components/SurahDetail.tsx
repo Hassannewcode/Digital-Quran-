@@ -3,6 +3,7 @@ import { Surah, Ayah, PlayingState, Note, Reciter, Translation, PlayingMode, Lea
 import AyahView from './AyahView';
 import PlaybackControls from './PlaybackControls';
 import SettingsPanel from './SettingsPanel';
+import { useLanguage } from '../hooks/useLanguage';
 
 interface SurahDetailProps {
   surah: Surah;
@@ -67,6 +68,7 @@ const SurahDetail: React.FC<SurahDetailProps> = ({
     speed,
     onSpeedChange,
 }) => {
+  const { t } = useLanguage();
   const surahNotes = notes
     .filter(note => note.surahId === surah.id)
     .sort((a, b) => a.ayahId - b.ayahId);
@@ -87,20 +89,20 @@ const SurahDetail: React.FC<SurahDetailProps> = ({
         onSpeedChange={onSpeedChange}
     />
     {selectedTranslationId === 'none' && (
-        <div className="my-6 p-4 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 rounded-r-lg text-blue-700 dark:text-blue-300">
-          <p className="font-semibold">View Translation</p>
-          <p className="text-sm">To display an English translation, please choose one from the dropdown menu above.</p>
+        <div className="my-6 p-4 bg-blue-50 dark:bg-blue-900/20 border-l-4 rtl:border-l-0 rtl:border-r-4 border-blue-500 rounded-r-lg rtl:rounded-r-none rtl:rounded-l-lg text-blue-700 dark:text-blue-300">
+          <p className="font-semibold">{t('view_translation_title')}</p>
+          <p className="text-sm">{t('view_translation_prompt')}</p>
         </div>
       )}
-    <div className={`flex flex-col ${hasNotes ? 'lg:flex-row-reverse' : ''} gap-8 items-start`}>
+    <div className={`flex flex-col ${hasNotes ? 'md:flex-row-reverse md:rtl:flex-row' : ''} gap-8 items-start`}>
       {hasNotes && (
-        <aside className="w-full lg:w-1/3">
+        <aside className="w-full md:w-1/3">
           <div className="sticky top-24">
-            <h3 className="text-lg font-semibold mb-4 text-slate-700 dark:text-zinc-300 font-arabic">ملاحظات</h3>
+            <h3 className="text-lg font-semibold mb-4 text-slate-700 dark:text-zinc-300 font-arabic">{t('notes')}</h3>
             <div className="space-y-4 max-h-[70vh] overflow-y-auto p-1">
               {surahNotes.map(note => (
                 <div key={note.ayahId} id={`note-${note.surahId}-${note.ayahId}`} className="p-4 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg shadow-sm">
-                  <p className="font-bold text-sm text-blue-600 dark:text-blue-400">Verse {note.ayahId}</p>
+                  <p className="font-bold text-sm text-blue-600 dark:text-blue-400">{t('verse')} {note.ayahId}</p>
                   <p className="text-sm text-slate-700 dark:text-zinc-300 mt-1 whitespace-pre-wrap">{note.text}</p>
                 </div>
               ))}
@@ -108,7 +110,7 @@ const SurahDetail: React.FC<SurahDetailProps> = ({
           </div>
         </aside>
       )}
-      <div className={`w-full ${hasNotes ? 'lg:w-2/3' : 'lg:w-full'}`}>
+      <div className={`w-full ${hasNotes ? 'md:w-2/3' : 'w-full'}`}>
         <PlaybackControls 
           surah={surah}
           playingState={playingState}

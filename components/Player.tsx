@@ -23,6 +23,8 @@ interface PlayerProps {
     onRepeatCountChange: (count: number) => void;
     isInfinite: boolean;
     onIsInfiniteChange: (isInfinite: boolean) => void;
+    isAutoScrollEnabled: boolean;
+    onToggleAutoScroll: () => void;
 }
 
 const formatTime = (seconds: number) => {
@@ -35,6 +37,7 @@ const formatTime = (seconds: number) => {
 const Player: React.FC<PlayerProps> = ({
     playingState, surah, ayah, elapsedTime, totalTime,
     onClose, onPlayPause, onNext, onPrevious, onSeek, volume, onVolumeChange,
+    isAutoScrollEnabled, onToggleAutoScroll,
     ...modalProps
 }) => {
     const { status, mode } = playingState;
@@ -89,6 +92,8 @@ const Player: React.FC<PlayerProps> = ({
                             onMouseDown={handleSeekMouseDown}
                             onMouseUp={handleSeekMouseUp}
                             disabled={!isSeekable}
+                            aria-label="Seek playback"
+                            aria-valuetext={formatTime(elapsedTime)}
                             className="w-full h-1.5 bg-slate-600 rounded-lg appearance-none cursor-pointer disabled:cursor-not-allowed [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-md [&:disabled::-webkit-slider-thumb]:bg-slate-400"
                             style={{ backgroundSize: `${isSeekable ? progress : 0}% 100%` }}
                         />
@@ -102,10 +107,18 @@ const Player: React.FC<PlayerProps> = ({
                         </div>
                         
                         <div className="flex-shrink-0 flex items-center gap-1 sm:gap-2">
+                             <button
+                                onClick={onToggleAutoScroll}
+                                className={`p-2 rounded-full transition-colors ${isAutoScrollEnabled ? 'text-blue-400 bg-blue-900/50' : 'text-slate-300 hover:text-white'}`}
+                                title={`Auto-Scroll: ${isAutoScrollEnabled ? 'On' : 'Off'}`}
+                                aria-pressed={isAutoScrollEnabled}
+                                >
+                                <span className="material-symbols-outlined">{isAutoScrollEnabled ? 'location_searching' : 'location_disabled'}</span>
+                            </button>
                             <button onClick={() => setIsSettingsOpen(true)} className="p-2 text-slate-300 hover:text-white transition-colors" title="Playback Settings">
                                 <span className="material-symbols-outlined">more_horiz</span>
                             </button>
-                            <button onClick={onPrevious} disabled={mode === 'full-surah'} className="p-2 text-slate-300 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                            <button onClick={onPrevious} disabled={mode === 'full-surah'} className="p-2 text-slate-300 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed" aria-label="Previous Ayah">
                                 <PreviousIcon />
                             </button>
                             <button 
@@ -115,7 +128,7 @@ const Player: React.FC<PlayerProps> = ({
                             >
                                 {status === 'loading' ? <LoadingSpinner /> : status === 'playing' ? <StopIcon /> : <PlayIcon />}
                             </button>
-                            <button onClick={onNext} disabled={mode === 'full-surah'} className="p-2 text-slate-300 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                            <button onClick={onNext} disabled={mode === 'full-surah'} className="p-2 text-slate-300 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed" aria-label="Next Ayah">
                                 <NextIcon />
                             </button>
                              <div className="group hidden sm:flex items-center gap-2">
@@ -127,13 +140,14 @@ const Player: React.FC<PlayerProps> = ({
                                     step="0.05"
                                     value={volume}
                                     onChange={(e) => onVolumeChange(parseFloat(e.target.value))}
+                                    aria-label="Volume control"
                                     className="w-20 h-1 bg-slate-600 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full"
                                 />
                             </div>
                         </div>
 
                         <div className="flex-1 flex items-center justify-end">
-                            <button onClick={onClose} className="p-2 text-slate-300 hover:text-white transition-colors" title="Close Player">
+                            <button onClick={onClose} className="p-2 text-slate-300 hover:text-white transition-colors" title="Close Player" aria-label="Close Player">
                                 <CloseIcon />
                             </button>
                         </div>

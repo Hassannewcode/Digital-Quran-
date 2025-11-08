@@ -44,7 +44,10 @@ const RecitationPractice: React.FC<RecitationPracticeProps> = ({ session, onClos
   } = useSpeechRecognition();
   
   const [score, setScore] = useState<{ correct: number, incorrect: number, accuracy: number } | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const triggerElementRef = useRef<HTMLElement | null>(null);
+
 
   const { originalWords, wordMap } = useMemo(() => getFullTextAndWordMap(surah, range), [surah, range]);
 
@@ -74,6 +77,44 @@ const RecitationPractice: React.FC<RecitationPracticeProps> = ({ session, onClos
       }
     }
   }, [isListening, transcript, correctCount, incorrectCount]);
+
+  // Accessibility: Focus trap for the modal view
+  useEffect(() => {
+    triggerElementRef.current = document.activeElement as HTMLElement;
+    const focusableElements = containerRef.current?.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (!focusableElements || focusableElements.length === 0) return;
+
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+    
+    firstElement.focus();
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return;
+
+      if (e.shiftKey) { // Shift + Tab
+        if (document.activeElement === firstElement) {
+          lastElement.focus();
+          e.preventDefault();
+        }
+      } else { // Tab
+        if (document.activeElement === lastElement) {
+          firstElement.focus();
+          e.preventDefault();
+        }
+      }
+    };
+
+    const container = containerRef.current;
+    container?.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      container?.removeEventListener('keydown', handleKeyDown);
+      triggerElementRef.current?.focus();
+    };
+  }, []);
 
   const handleToggleListening = () => {
     if (isListening) {
@@ -107,19 +148,19 @@ const RecitationPractice: React.FC<RecitationPracticeProps> = ({ session, onClos
   let wordCounter = 0;
 
   return (
-    <div className="fixed inset-0 bg-slate-100 dark:bg-zinc-900 z-50 flex flex-col p-4 sm:p-8">
+    <div ref={containerRef} className="fixed inset-0 bg-slate-100 dark:bg-zinc-900 z-50 flex flex-col p-4 sm:p-8" role="dialog" aria-modal="true" aria-labelledby="practice-title">
       <header className="flex-shrink-0 flex items-center justify-between pb-4 border-b border-slate-300 dark:border-zinc-700">
         <div>
-            <h2 className="text-xl sm:text-2xl font-bold font-arabic">{surah.name}: {range.start}{range.start !== range.end && `-${range.end}`}</h2>
+            <h2 id="practice-title" className="text-xl sm:text-2xl font-bold font-arabic">{surah.name}: {range.start}{range.start !== range.end && `-${range.end}`}</h2>
             <p className="text-slate-600 dark:text-zinc-400 capitalize">{mode} Mode</p>
         </div>
-        <button onClick={onClose} className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-zinc-800">
+        <button onClick={onClose} className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-zinc-800" aria-label="Close recitation practice">
           <span className="material-symbols-outlined">close</span>
         </button>
       </header>
 
       <div className="flex-shrink-0 px-4 sm:px-8 pt-4">
-        <div className="w-full bg-slate-200 dark:bg-zinc-700 rounded-full h-2.5">
+        <div className="w-full bg-slate-200 dark:bg-zinc-700 rounded-full h-2.5" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}>
           <div className="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style={{ width: `${progress}%` }}></div>
         </div>
         {!isListening && !score && (
@@ -148,15 +189,15 @@ const RecitationPractice: React.FC<RecitationPracticeProps> = ({ session, onClos
                           </span>
                       )
                   })}
-                   <span className="text-xl font-amiri-quran select-none text-blue-500 dark:text-blue-400 mr-2">﴿{ayah.id.toLocaleString('ar')}﴾</span>
+                   <span className="text-2xl font-amiri-quran select-none text-blue-500 dark:text-blue-400 mr-2">﴿{ayah.id.toLocaleString('ar')}﴾</span>
               </div>
           )})}
         </div>
       </main>
 
       <footer className="flex-shrink-0 pt-4 border-t border-slate-300 dark:border-zinc-700">
-         <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
-            <div className="flex gap-2" style={{minWidth: '150px'}}>
+         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex gap-2 order-2 sm:order-1">
                 <button
                     onClick={handleToggleListening}
                     className={`flex items-center gap-2 px-6 py-3 rounded-lg text-white font-semibold transition-colors text-lg ${
@@ -171,11 +212,12 @@ const RecitationPractice: React.FC<RecitationPracticeProps> = ({ session, onClos
                     className="flex items-center gap-2 px-4 py-3 rounded-lg bg-slate-200 text-slate-700 dark:bg-zinc-700 dark:text-zinc-200 font-semibold transition-colors text-lg hover:bg-slate-300 dark:hover:bg-zinc-600 disabled:opacity-50"
                     title="Try Again"
                     disabled={isListening}
+                    aria-label="Try Again"
                 >
                     <span className="material-symbols-outlined">refresh</span>
                 </button>
             </div>
-            <div className="flex-1 px-4 text-center">
+            <div className="flex-1 px-4 text-center order-1 sm:order-2 w-full">
                 {isListening ? (
                     <div className="flex items-center justify-center gap-6 text-slate-700 dark:text-zinc-300">
                         <p className="text-lg font-medium">Correct: <span className="font-bold text-green-500">{correctCount}</span></p>
@@ -194,7 +236,7 @@ const RecitationPractice: React.FC<RecitationPracticeProps> = ({ session, onClos
                     <p dir="rtl" className="text-slate-600 dark:text-zinc-400 font-arabic truncate" title={transcript}>{transcript || "Press 'Recite' to begin."}</p>
                 )}
             </div>
-            <div style={{minWidth: '150px'}}></div>
+            <div className="order-3 hidden sm:block w-[150px]"></div>
          </div>
       </footer>
     </div>

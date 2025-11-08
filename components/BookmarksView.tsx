@@ -1,5 +1,6 @@
 import React from 'react';
 import { Bookmark, Surah, Ayah } from '../types';
+import { useLanguage } from '../hooks/useLanguage';
 
 interface BookmarksViewProps {
   bookmarks: Bookmark[];
@@ -8,12 +9,14 @@ interface BookmarksViewProps {
 }
 
 const BookmarksView: React.FC<BookmarksViewProps> = ({ bookmarks, allSurahs, onNavigate }) => {
+    const { t } = useLanguage();
+
     if (bookmarks.length === 0) {
         return (
             <div className="text-center py-12">
                 <span className="material-symbols-outlined text-6xl text-slate-300 dark:text-zinc-600">bookmark</span>
-                <h2 className="mt-4 text-2xl font-semibold text-slate-700 dark:text-zinc-300">No Bookmarks Yet</h2>
-                <p className="mt-2 text-slate-500 dark:text-zinc-400">You can bookmark verses as you read them.</p>
+                <h2 className="mt-4 text-2xl font-semibold text-slate-700 dark:text-zinc-300">{t('no_bookmarks_title')}</h2>
+                <p className="mt-2 text-slate-500 dark:text-zinc-400">{t('no_bookmarks_prompt')}</p>
             </div>
         )
     }
@@ -26,7 +29,7 @@ const BookmarksView: React.FC<BookmarksViewProps> = ({ bookmarks, allSurahs, onN
 
     return (
         <div className="space-y-4">
-             <h2 className="text-xl font-bold text-slate-700 dark:text-zinc-300 mb-4 font-arabic">المفضلات</h2>
+             <h2 className="text-xl font-bold text-slate-700 dark:text-zinc-300 mb-4 font-arabic">{t('bookmarks')}</h2>
             {bookmarks.map((bookmark, index) => {
                 const { surah, ayah } = getBookmarkedAyahDetails(bookmark);
                 if (!surah || !ayah) return null;
@@ -35,13 +38,13 @@ const BookmarksView: React.FC<BookmarksViewProps> = ({ bookmarks, allSurahs, onN
                     <button
                         key={`${surah.id}-${ayah.id}-${index}`}
                         onClick={() => onNavigate(surah)}
-                        className="w-full text-left p-4 bg-white dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-800 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                        aria-label={`Go to Surah ${surah.name}, Ayah ${ayah.id}`}
+                        className="w-full text-left rtl:text-right p-4 bg-white dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-800 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        aria-label={`${t('go_to_surah')} ${surah.name}, ${t('verse')} ${ayah.id}`}
                     >
                         <div className="mb-2">
                            <span className="font-semibold text-blue-600 dark:text-blue-400">{surah.name}</span>
                            <span className="text-slate-500 dark:text-zinc-400 mx-2">&bull;</span>
-                           <span className="text-slate-500 dark:text-zinc-400">Verse {ayah.id}</span>
+                           <span className="text-slate-500 dark:text-zinc-400">{t('verse')} {ayah.id}</span>
                         </div>
                         <p dir="rtl" className="font-amiri-quran text-2xl text-slate-800 dark:text-zinc-200">{ayah.text}</p>
                         {ayah.translation && <p className="mt-2 text-slate-600 dark:text-zinc-400 text-sm">{ayah.translation}</p>}

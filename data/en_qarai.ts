@@ -1,1 +1,185 @@
-export const EN_QARAI_TRANSLATION: Record<string, Record<string, string>> = {};
+// Quran Translation: Ali Quli Qara'i
+// Source: Tanzil Project (tanzil.net)
+//
+// PLEASE DO NOT REMOVE OR CHANGE THIS COPYRIGHT BLOCK
+//====================================================================
+//
+//  Tanzil Quran Text (Ali Quli Qara'i, Version 1.1)
+//  Copyright (C) 2007-2025 Tanzil Project
+//
+//  This copy of the Quran translation is carefully produced, highly 
+//  verified and continuously monitored by a group of specialists 
+//  at Tanzil Project.
+//
+//  TERMS OF USE:
+//
+//  - Permission is granted to copy and distribute verbatim copies 
+//    of this text, but CHANGING IT IS NOT ALLOWED.
+//
+//  - This translation can be used in any website or application, 
+//    provided that its source (Tanzil Project) is clearly indicated, 
+//    and a link is made to tanzil.net to enable users to keep
+//    track of changes.
+//
+//  - This copyright notice shall be included in all verbatim copies 
+//    of the text, and shall be reproduced appropriately in all files 
+//    derived from or containing substantial portion of this text.
+//
+//  Please check updates at: http://tanzil.net/updates/
+//
+//====================================================================
+
+export const EN_QARAI_TRANSLATION: Record<string, Record<string, string>> = {
+    "1": {
+        "1": "In the Name of Allah, the All-beneficent, the All-merciful.",
+        "2": "All praise belongs to Allah, Lord of all the worlds,",
+        "3": "the All-beneficent, the All-merciful,",
+        "4": "Master of the Day of Retribution.",
+        "5": "You [alone] do we worship, and to You [alone] do we turn for help.",
+        "6": "Guide us on the straight path,",
+        "7": "the path of those whom You have blessed — such as have not incurred Your wrath, nor are astray."
+    },
+    "2": {
+        "1": "Alif, Lam, Mim.",
+        "2": "This is the Book, there is no doubt in it, a guidance to the Godwary,",
+        "3": "who believe in the Unseen, and maintain the prayer, and spend out of what We have provided them,",
+        "4": "and who believe in what has been sent down to you and what was sent down before you, and are certain of the Hereafter.",
+        "5": "Those follow guidance from their Lord, and it is they who are the felicitous.",
+        "6": "As for the faithless, it is the same to them whether you warn them or do not warn them, they will not have faith.",
+        "7": "Allah has set a seal on their hearts and their hearing, and on their eyes is a covering, and there is a great punishment for them.",
+        "8": "And among the people are those who say, ‘We have faith in Allah and the Last Day,’ but they have no faith.",
+        "9": "They seek to deceive Allah and those who have faith, yet they deceive no one but themselves, but they are not aware.",
+        "10": "There is a sickness in their hearts; then Allah increased their sickness, and there is a painful punishment for them because of the lies they used to tell.",
+        "11": "And when they are told, ‘Do not cause corruption on the earth,’ they say, ‘We are only reformers!’",
+        "12": "Look! They are themselves the agents of corruption, but they are not aware.",
+        "13": "And when they are told, ‘Believe like the people who have believed,’ they say, ‘Shall we believe like the fools have believed?’ Look! They are themselves the fools, but they do not know.",
+        "14": "When they meet the faithful, they say, ‘We believe,’ but when they are alone with their devils, they say, ‘We are with you; we were only deriding [them].’",
+        "15": "It is Allah who derides them, and leaves them bewildered in their rebellion.",
+        "16": "They are the ones who have bought error for guidance; so their trade has brought no profit, and they are not guided.",
+        "17": "Their parable is that of one who lighted a fire, and when it lit up all around him, Allah took away their light, and left them in a darkness where they are unable to see.",
+        "18": "Deaf, dumb, and blind, they will not come back.",
+        "19": "Or that of a rainstorm from the sky, wherein is darkness, thunder, and lightning: they put their fingers in their ears due to the thunderclaps, apprehensive of death; and Allah encompasses the faithless.",
+        "20": "The lightning almost snatches away their sight: whenever it shines for them, they walk in it, and when it darkens over them, they stand still. Had Allah wished, He would have taken away their hearing and sight. Indeed Allah has power over all things.",
+        "21": "O mankind! Worship your Lord, who created you and those who were before you, so that you may be Godwary",
+        "22": "—He who made the earth a place of repose for you, and the sky a canopy, and sent down water from the sky, and with it brought forth crops for your sustenance. So do not set up equals to Allah, while you know.",
+        "23": "And if you are in doubt concerning what We have sent down to Our servant, then bring a surah like it, and call your witnesses besides Allah, if you are truthful.",
+        "24": "But if you do not—and you will not—then beware the Fire whose fuel will be humans and stones, prepared for the faithless.",
+        "25": "And give good news to those who have faith and do righteous deeds, that for them shall be gardens with streams running in them: whenever they are provided with a fruit from them, they will say, ‘This is what we were provided before,’ and they were given something resembling it. In it there will be chaste mates for them, and they will remain in it [forever].",
+        "26": "Indeed Allah is not ashamed to draw a parable whether it is that of a gnat or of something above it. As for those who have faith, they know it is the truth from their Lord; and as for the faithless, they say, ‘What did Allah mean by this parable?’ Thereby He leads many astray, and thereby He guides many; and thereby He leads no one astray except the transgressors",
+        "27": "—those who break the covenant of Allah after its solemn binding, and sever what Allah has commanded to be joined, and cause corruption in the earth—it is they who are the losers.",
+        "28": "How can you be faithless to Allah, seeing that you were dead and He gave you life, then He will make you die and then bring you to life, and then you will be brought back to Him?",
+        "29": "It is He who created for you all that is in the earth, then He turned to the heaven and fashioned it into seven heavens, and He has knowledge of all things.",
+        "30": "When your Lord said to the angels, ‘I am going to place a successor on the earth,’ they said, ‘Will You place on it someone who will cause corruption on it and shed blood, while we celebrate Your praise and proclaim Your sanctity?’ He said, ‘I know what you do not know.’",
+        "31": "And He taught Adam the Names, all of them; then presented them to the angels and said, ‘Tell me the names of these, if you are truthful.’",
+        "32": "They said, ‘Immaculate are You! We have no knowledge except what You have taught us. Indeed You are the All-knowing, the All-wise.’",
+        "33": "He said, ‘O Adam, inform them of their names.’ When he had informed them of their names, He said, ‘Did I not tell you that I know the Unseen of the heavens and the earth, and that I know what you reveal and what you conceal?’",
+        "34": "And when We said to the angels, ‘Prostrate before Adam,’ they prostrated, but not Iblis: he refused and acted arrogantly, and he was one of the faithless.",
+        "35": "We said, ‘O Adam, dwell with your mate in paradise and eat thereof freely whencesoever you wish, but do not approach this tree, lest you should be among the wrongdoers.’",
+        "36": "But Satan caused them to stumble from it, and he drove them out from what they were in. We said, ‘Get down, being enemies of one another! On the earth shall be your abode and sustenance for a time.’",
+        "37": "Then Adam received certain words from his Lord, and He turned to him clemently. Indeed He is the All-clement, the All-merciful.",
+        "38": "We said, ‘Get down from it, all of you! Yet, should any guidance come to you from Me, those who follow My guidance shall have no fear, nor shall they grieve.",
+        "39": "But as for those who are faithless and deny Our signs, they shall be the inmates of the Fire, and they will remain in it [forever].’",
+        "40": "O Children of Israel, remember My blessing which I bestowed upon you, and fulfill your covenant with Me, and I will fulfill My covenant with you, and be in awe of Me [alone].",
+        "41": "And believe in that which I have sent down confirming that which is with you, and do not be the first to deny it, and do not sell My signs for a paltry gain, and be wary of Me [alone].",
+        "42": "And do not confound the truth with falsehood, nor conceal the truth while you know.",
+        "43": "And maintain the prayer and give the zakat, and bow along with those who bow.",
+        "44": "Will you bid others to piety and forget yourselves, while you recite the Book? Do you not apply reason?",
+        "45": "And take recourse in patience and prayer, and it is indeed hard except for the humble",
+        "46": "—those who know that they are to meet their Lord and that to Him they are to return.",
+        "47": "O Children of Israel, remember My blessing which I bestowed upon you, and that I gave you an advantage over all the nations.",
+        "48": "And beware of a day when no soul will compensate for another in the least, nor will any intercession be accepted from it, nor will any ransom be received from it, nor will they be helped.",
+        "49": "And when We delivered you from Pharaoh’s clan who inflicted a terrible torment on you, slaughtering your sons and sparing your women, and in that there was a great test from your Lord.",
+        "50": "And when We parted the sea for you and delivered you, and drowned Pharaoh’s clan as you looked on.",
+        "51": "And when We made an appointment with Moses for forty nights, you took up the Calf [for worship] in his absence, and you were wrongdoers.",
+        "52": "Then We excused you after that so that you might give thanks.",
+        "53": "And when We gave Moses the Book and the Criterion so that you might be guided.",
+        "54": "And when Moses said to his people, ‘O my people, you have indeed wronged yourselves by taking up the Calf [for worship]. So turn penitently to your Maker, and slay [the guilty among] your folks. That will be better for you with your Maker.’ Then He turned to you clemently. Indeed He is the All-clement, the All-merciful.",
+        "55": "And when you said, ‘O Moses, we will not believe you until we see Allah visibly.’ Thereupon a thunderbolt seized you as you looked on.",
+        "56": "Then We raised you up after your death so that you might give thanks.",
+        "57": "And We shaded you with clouds, and sent down to you manna and quails: ‘Eat of the good things We have provided you.’ And they did not wrong Us, but they used to wrong themselves.",
+        "58": "And when We said, ‘Enter this town, and eat thereof freely whencesoever you wish, and enter the gate prostrating, and say, ‘‘Relieve [us of the burden of our sins],’’ so that We may forgive your iniquities, and We will soon enhance the virtuous.’",
+        "59": "But the wrongdoers changed the saying with other than what they had been told. So We sent down on those who were wrongdoers a plague from the sky because of the transgressions they used to commit.",
+        "60": "And when Moses prayed for water for his people, We said, ‘Strike the rock with your staff.’ Thereat twelve fountains gushed forth from it; every tribe came to know its drinking-place. ‘Eat and drink of Allah’s provision, and do not act wickedly on the earth, causing corruption.’",
+        "61": "And when you said, ‘O Moses, we will not put up with one kind of food. So invoke your Lord for us, that He may bring forth for us of that which the earth grows—its greens and its cucumbers, its garlic, its lentils, and its onions.’ He said, ‘Would you exchange what is inferior for that which is superior? Go down to any town and you will indeed get what you ask for!’ And abasement and poverty were pitched upon them, and they earned Allah’s wrath. That, because they would deny the signs of Allah and kill the prophets unjustly. That, because they would disobey and commit transgressions.",
+        "62": "Indeed the faithful, the Jews, the Christians and the Sabaeans—those of them who have faith in Allah and the Last Day and act righteously—they shall have their reward from their Lord, and they will have no fear, nor will they grieve.",
+        "63": "And when We took a pledge from you, and raised the Mount above you: ‘Hold on with power to what We have given you and remember what is in it, so that you may be Godwary.’",
+        "64": "Then after that you turned away, and had it not been for Allah’s grace on you and His mercy, you would surely have been among the losers.",
+        "65": "And certainly you know those of you who violated the Sabbath, whereupon We said to them, ‘Be you spurned apes.’",
+        "66": "So We made it an exemplary punishment for the present and the succeeding [generations], and an admonition for the Godwary.",
+        "67": "And when Moses said to his people, ‘Indeed Allah commands you to slaughter a cow,’ they said, ‘Are you mocking us?’ He said, ‘I seek Allah’s protection from being one of the ignorant!’",
+        "68": "They said, ‘Invoke your Lord for us, that He may clarify for us what she may be.’ He said, ‘He says, she is a cow, neither old nor young, of a middle age. Now do what you are commanded.’",
+        "69": "They said, ‘Invoke your Lord for us, that He may clarify for us her colour.’ He said, ‘He says, she is a yellow cow, of a bright hue, pleasing to the onlookers.’",
+        "70": "They said, ‘Invoke your Lord for us, that He may clarify for us what she may be. Indeed all cows look alike to us, and if Allah wishes, we will surely be guided.’",
+        "71": "He said, ‘He says, she is a cow not broken to till the earth or to water the tillage, sound and without any blemish.’ They said, ‘Now have you come up with the truth!’ And they slaughtered it, though they were about not to do it.",
+        "72": "And when you killed a soul, and cast the blame for it on one another, Allah was to expose what you were concealing.",
+        "73": "We said, ‘Strike him with a part of her.’ Thus does Allah revive the dead, and He shows you His signs so that you may apply reason.",
+        "74": "Then your hearts hardened after that; so they are like stones, or even harder. For indeed there are some stones from which streams gush forth, and indeed there are some of them that split, and water issues from them, and indeed there are some of them that fall for the fear of Allah. And Allah is not oblivious of what you do.",
+        "75": "Are you then eager that they should believe you, while a part of them would hear the word of Allah and then they would distort it after they had understood it, and they knew [what they were doing]?",
+        "76": "When they meet the faithful, they say, ‘We believe,’ and when they are alone with one another, they say, ‘Do you recount to them what Allah has revealed to you, so that they may argue with you therewith before your Lord? Do you not apply reason?’",
+        "77": "Do they not know that Allah knows whatever they hide and whatever they disclose?",
+        "78": "And among them are the illiterate who know nothing of the Book except hearsay, and they only make conjectures.",
+        "79": "So woe to them who write the Book with their hands and then say, ‘This is from Allah,’ that they may sell it for a paltry gain. So woe to them for what their hands have written, and woe to them for what they earn!",
+        "80": "And they say, ‘The Fire will not touch us except for a number of days.’ Say, ‘Have you taken a promise from Allah? If so, Allah will never break His promise. Or do you attribute to Allah what you do not know?’",
+        "81": "Yes, whoever commits an evil and is besieged by his sin—those are the inmates of the Fire, and they will remain in it [forever].",
+        "82": "And those who have faith and do righteous deeds—they are the inhabitants of paradise, and they will remain in it [forever].",
+        "83": "And when We took a pledge from the Children of Israel: ‘Worship no one but Allah, do good to parents, relatives, orphans, and the needy, and speak kindly to people, and maintain the prayer, and give the zakat,’ you turned away, except a few of you, and you were disregardful.",
+        "84": "And when We took a pledge from you: ‘You shall not shed your blood, and you shall not expel one another from your homes,’ you pledged, and you testified.",
+        "85": "Then there you are, killing your folks and expelling a part of your folks from their homes, backing one another against them in sin and aggression! And if they come to you as captives, you ransom them, though their expulsion was forbidden you. What! Do you believe in part of the Book and defy another part? So what is the requital of those of you who do that except disgrace in the life of this world? And on the Day of Resurrection, they shall be consigned to the severest punishment. And Allah is not oblivious of what you do.",
+        "86": "They are the ones who bought the life of this world for the Hereafter. So their punishment shall not be lightened, nor will they be helped.",
+        "87": "Certainly We gave Moses the Book, and after him We sent messengers in succession. We gave Jesus, son of Mary, manifest proofs, and confirmed him with the Holy Spirit. Is it not that whenever a messenger brought you something that was not to your liking, you would act arrogantly; so you would impugn a part [of them], and slay a part?",
+        "88": "And they say, ‘Our hearts are uncircumcised.’ Rather Allah has cursed them for their unfaith, so little is that they believe.",
+        "89": "And when there came to them a Book from Allah, confirming that which is with them—and they would plead for victory against the faithless [in its name]—so when there came to them what they recognized, they denied it. So may the curse of Allah be on the faithless!",
+        "90": "Evil is that for which they have sold their souls, that they should deny what Allah has sent down, out of envy that Allah should bestow His grace on any of His servants that He wishes. Thus they have drawn wrath upon wrath, and for the faithless there is a humiliating punishment.",
+        "91": "And when they are told, ‘Believe in what Allah has sent down,’ they say, ‘We believe in what was sent down to us,’ and they deny what is besides it, though it is the truth confirming what is with them. Say, ‘Why did you kill the prophets of Allah aforetime, if you were faithful?’",
+        "92": "Certainly Moses brought you manifest proofs, then you took up the Calf in his absence and you were wrongdoers.’",
+        "93": "And when We took a pledge from you, and raised the Mount above you, [saying,] ‘Hold on with power to what We have given you, and do listen!’ They said, ‘We hear, and disobey,’ and their hearts were imbued with [the love of] the Calf due to their unfaith. Say, ‘Evil is that to which your faith prompts you, if you are faithful!’",
+        "94": "Say, ‘If the abode of the Hereafter were exclusively for you with Allah, and not for other people, then long for death, should you be truthful.’",
+        "95": "But they will never long for it because of what their hands have sent ahead, and Allah knows best the wrongdoers.",
+        "96": "And you will surely find them the greediest of people for life, and [greedier] than the polytheists. Each of them is eager to live a thousand years, but it would not deliver him from the punishment were he to live [that long]. And Allah sees what they do.",
+        "97": "Say, ‘Whoever is an enemy of Gabriel [should know that] it is he who has brought it down on your heart by Allah’s permission, confirming what is before it, and as a guidance and good news for the faithful.’",
+        "98": "‘Whoever is an enemy of Allah and His angels and His messengers and Gabriel and Michael, [should know that] Allah is indeed the enemy of the faithless.’",
+        "99": "Certainly We have sent down to you manifest signs, and no one denies them except the transgressors.",
+        "100": "Is it not that whenever they made a covenant, a part of them would cast it away? Rather, most of them do not have faith.",
+        "101": "And when a messenger from Allah came to them, confirming that which was with them, a part of those who were given the Book cast the Book of Allah behind their backs, as if they did not know.",
+        "102": "And they followed what the devils pursued during Solomon’s reign —and Solomon was not faithless but it was the devils who were faithless—teaching the people magic and what was sent down to the two angels at Babylon, Harut and Marut, who would not teach anyone until they had said, ‘We are only a test, so do not be faithless.’ But they would learn from them that by which they would make a split between a man and his wife. But they could not harm anyone with it except with Allah’s leave. They would learn that which would harm them and bring them no benefit; and they certainly knew that anyone who buys it has no share in the Hereafter. Surely, evil is that for which they sold their souls, had they known!",
+        "103": "And had they been faithful and Godwary, the reward from Allah would have been better, had they known.",
+        "104": "O you who have faith! Do not say, Ra‘ina, but say, Unzurna, and listen! And there is a painful punishment for the faithless.",
+        "105": "The faithless from among the People of the Book and the polytheists would not like that any good be sent down to you from your Lord. But Allah singles out for His mercy whomever He wishes, and Allah is dispenser of a great grace.",
+        "106": "For any verse that We abrogate or cause to be forgotten, We bring one better than it or like it. Do you not know that Allah has power over all things?",
+        "107": "Do you not know that to Allah belongs the kingdom of the heavens and the earth, and that besides Allah you have no guardian or helper?",
+        "108": "Would you question your Apostle as Moses was questioned formerly? And whoever exchanges faith for faithlessness has certainly strayed from the right way.",
+        "109": "Many of the People of the Book are eager to turn you into unbelievers after your faith, out of their inner envy, [and] after the truth has become manifest to them. But excuse [them] and forbear until Allah issues His edict. Indeed Allah has power over all things.",
+        "110": "And maintain the prayer and give the zakat. And whatever good you send ahead for your souls, you will find it with Allah. Indeed Allah sees best what you do.",
+        "111": "And they say, ‘No one will enter paradise except one who is a Jew or a Christian.’ Those are their fantasies. Say, ‘Produce your evidence, should you be truthful.’",
+        "112": "Yes, whoever submits his soul to Allah and is a virtuous-doer, his reward is with his Lord, and no fear shall befall them, nor shall they grieve.",
+        "113": "The Jews say, ‘The Christians stand on nothing,’ and the Christians say, ‘The Jews stand on nothing,’ though they follow the Book. So said those who had no knowledge, [words] similar to what they say. Allah will judge between them on the Day of Resurrection concerning that about which they used to differ.",
+        "114": "Who is a greater wrongdoer than him who forbids the mosques of Allah from being mentioned in them His Name, and seeks to ruin them? Such ones may not enter them, except in fear. For them is disgrace in this world, and a great punishment in the Hereafter.",
+        "115": "To Allah belong the east and the west: so whichever way you turn, there is the face of Allah! Indeed Allah is all-bounteous, all-knowing.",
+        "116": "And they say, ‘Allah has taken a son.’ Immaculate is He! Rather, to Him belongs whatever is in the heavens and the earth. All are obedient to Him,",
+        "117": "the Originator of the heavens and the earth. When He decides on a matter, He just says to it, ‘Be!’ and it is.",
+        "118": "And those who have no knowledge say, ‘Why does not Allah speak to us, or a sign come to us?’ So said those who were before them, [words] similar to what they say. Their hearts are alike. We have certainly made the signs clear for a people who have certainty.",
+        "119": "Indeed We have sent you with the truth as a bearer of good news and as a warner, and you will not be questioned about the inhabitants of Hell.",
+        "120": "The Jews will never be pleased with you, nor the Christians, unless you follow their creed. Say, ‘Indeed it is the guidance of Allah which is the [true] guidance.’ And should you follow their desires after the knowledge that has come to you, you will not have against Allah any guardian or helper.",
+        "121": "Those to whom We have given the Book follow it as it ought to be followed; it is they who believe in it, and whoever denies it, it is they who are the losers.",
+        "122": "O Children of Israel, remember My blessing which I bestowed upon you, and that I gave you an advantage over all the nations.",
+        "123": "And beware of a day when no soul will compensate for another in the least, nor will any ransom be accepted from it, nor will any intercession be of any avail to it, nor will they be helped.",
+        "124": "And when his Lord tested Abraham with certain words, and he fulfilled them, He said, ‘I am making you the Imam of mankind.’ Said he, ‘And from among my descendants?’ He said, ‘My pledge does not extend to the unjust.’",
+        "125": "And when We made the House a place of resort for mankind and a sanctuary, [declaring], ‘Take the venue of prayer from Abraham’s station.’ And We charged Abraham and Ishmael [with its upkeep, saying], ‘Purify My House for those who go around it, and those who dedicate themselves to worship in it, and those who bow and prostrate.’",
+        "126": "And when Abraham said, ‘My Lord, make this a secure town, and provide its people with fruits—such of them as have faith in Allah and the Last Day,’ He said, ‘As for him who is faithless, I will grant him enjoyment for a short while, then I will drive him to the punishment of the Fire, and it is an evil destination.’",
+        "127": "As Abraham raised the foundations of the House with Ishmael, [they prayed]: ‘Our Lord, accept it from us! Indeed You are the All-hearing, the All-knowing.",
+        "128": "Our Lord, make us submissive to You, and from our descendants a nation submissive to You, and show us our rites [of worship], and turn to us clemently. Indeed You are the All-clement, the All-merciful.",
+        "129": "Our Lord, raise amongst them an apostle from among them, who will recite to them Your signs and teach them the Book and wisdom and purify them. Indeed You are the All-mighty, the All-wise.’",
+        "130": "Who will be averse to the creed of Abraham except one who is silly? We certainly chose him in this world, and in the Hereafter he will indeed be among the righteous.",
+        "131": "When his Lord said to him, ‘Submit,’ he said, ‘I submit to the Lord of all the worlds.’",
+        "132": "Abraham enjoined this [creed] upon his children, and [so did] Jacob, [saying], ‘My children, Allah has indeed chosen this religion for you; so do not die except as Muslims.’",
+        "133": "Were you witnesses when death approached Jacob, when he said to his children, ‘What will you worship after me?’ They said, ‘We will worship your God and the God of your fathers, Abraham, Ishmael, and Isaac, the One God, and to Him do we submit.’",
+        "134": "That was a nation that has passed away: for it is what it earned, and for you is what you have earned, and you will not be questioned about what they used to do.",
+        "135": "And they say, ‘Be Jews or Christians, and you shall be guided.’ Say, ‘No, rather the creed of Abraham, a Hanif, and he was not one of the polytheists.’",
+        "136": "Say, ‘We have faith in Allah, and in what has been sent down to us, and what was sent down to Abraham, Ishmael, Isaac, Jacob and the Tribes, and that which Moses and Jesus were given, and that which the prophets were given from their Lord; we make no distinction between any of them, and to Him do we submit.’",
+        "137": "So if they believe in the like of what you believe in, then they are surely guided; but if they turn away, then they are in schism. Allah will suffice you against them, and He is the All-hearing, the All-knowing.",
+        "138": "‘The baptism of Allah, and who baptizes better than Allah? And Him do we worship.’",
+        "139": "Say, ‘Will you argue with us concerning Allah, while He is our Lord and your Lord, and to us belong our deeds and to you belong your deeds, and we are sincerely devoted to Him?’",
+        "140": "Or do you say that Abraham, Ishmael, Isaac, Jacob, and the Tribes were Jews or Christians? Say, ‘Is it you who know better, or Allah?’ And who is a greater wrongdoer than him who conceals a testimony that is with him from Allah? And Allah is not oblivious of what you do.",
+        "141": "That was a nation that has passed away: for it is what it earned, and for you is what you have earned, and you will not be questioned about what they used to do."
+    }
+};
